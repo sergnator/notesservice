@@ -26,7 +26,7 @@ class User(Descripter):  # класс пользователя
         return User(_dict)
 
     @staticmethod
-    def from_json(js: str) -> Descripter:  # получает строку формата js и возвращает экземпляр класса
+    def from_json(js: str):  # получает строку формата js и возвращает экземпляр класса
         return User.from_json(json.loads(js))
 
 
