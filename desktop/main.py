@@ -12,7 +12,6 @@ from api.Users import User
 
 from tests.test_data.data import *
 
-
 if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
 	QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 
@@ -34,7 +33,7 @@ class App(QMainWindow, MainForm):
 	def __init__(self):
 		super().__init__()
 		self.setupUi(self)
-		self.curent_note_number = 0
+		self.current_note_number = 0
 		qdarktheme.setup_theme("light")
 		self.set_connection()
 
@@ -45,6 +44,7 @@ class App(QMainWindow, MainForm):
 		self.main_tabs.currentChanged.connect(self.change_tab)
 		self.next.clicked.connect(self.next_click)
 		self.back.clicked.connect(self.back_click)
+		self.edit_button.clicked.connect(self.edit_click)
 
 	def login_click(self):
 		name = self.name_field.text()
@@ -87,19 +87,35 @@ class App(QMainWindow, MainForm):
 		if self.main_tabs.currentWidget() == self.all_notes_tab:
 			self.back.setVisible(True)
 			self.next.setVisible(True)
-			if self.curent_note_number == 0:
+			if self.current_note_number == 0:
 				self.back.setVisible(False)
-			if self.curent_note_number == len(username.notes) - 1:
+			if self.current_note_number == len(username.notes) - 1:
 				self.next.setVisible(False)
-			self.note_read_field_2.setText(username.notes[self.curent_note_number].content)
+			self.note_read_field_2.setText(username.notes[self.current_note_number].content)
 
 	def next_click(self):
-		self.curent_note_number += 1
+		self.current_note_number += 1
 		self.change_tab()
 
 	def back_click(self):
-		self.curent_note_number -= 1
+		self.current_note_number -= 1
 		self.change_tab()
+
+	def edit_click(self):
+		content = username.notes[self.current_note_number].content
+		private = username.notes[self.current_note_number].private
+		self.main_tabs.setCurrentIndex(0)
+		self.note_write_field.setText(content)
+		self.is_private.setChecked(private)
+		self.send_button.clicked.disconnect()
+		self.send_button.clicked.connect(self.edit_send_click)
+
+	def edit_send_click(self):
+		username.notes[self.current_note_number].content = self.note_write_field.toPlainText()
+		username.notes[self.current_note_number].private = self.is_private.isChecked()
+		self.send_button.clicked.disconnect()
+		self.send_button.clicked.connect(self.edit_click)
+		self.main_tabs.setCurrentWidget(self.all_notes_tab)
 
 
 if __name__ == '__main__':

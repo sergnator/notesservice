@@ -21,3 +21,6 @@ class Note(Descripter):
 	@staticmethod
 	def from_json(js: str):  # получает строку формата js и возвращает экземпляр класса
 		return Note.from_json(json.loads(js))
+
+	def to_dict(self):
+		return {"username": self.username, "content": self.content, "private": self.private}
