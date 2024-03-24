@@ -18,6 +18,7 @@ class Ui_Form(object):
         self.message_label = QtWidgets.QLabel(Form)
         self.message_label.setGeometry(QtCore.QRect(10, 10, 281, 111))
         self.message_label.setText("")
+        self.message_label.setWordWrap(True)
         self.message_label.setObjectName("message_label")
         self.widget = QtWidgets.QWidget(Form)
         self.widget.setGeometry(QtCore.QRect(60, 140, 158, 25))

@@ -1,4 +1,4 @@
-from Base import Descripter
+from .Base import Descripter
 
 import json
 

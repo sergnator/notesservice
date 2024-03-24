@@ -1,7 +1,7 @@
 import json
 
-from Base import Descripter
-from Notes import Note
+from .Base import Descripter
+from .Notes import Note
 
 
 class User(Descripter):  # класс пользователя
@@ -22,7 +22,8 @@ class User(Descripter):  # класс пользователя
 
     @staticmethod
     def from_dict(_dict: dict):  # получает словарь и возвращает экземпляр класса
-        _dict["notes"] = [Note.from_dict(el) for el in _dict["notes"]]  # первращение всех dict of note в экземпляр Note
+        if "notes" in _dict.keys():
+            _dict["notes"] = [Note.from_dict(el) for el in _dict["notes"]]  # первращение всех dict of note в экземпляр Note
         return User(_dict)
 
     @staticmethod
