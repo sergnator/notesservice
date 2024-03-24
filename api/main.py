@@ -1,6 +1,7 @@
 import flask
 from flask_restful import Api
 from api_resource import note
+
 from db_session import Notes
 from db_session import db_session
 

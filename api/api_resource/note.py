@@ -9,8 +9,8 @@ from api.db_session.Notes import Note
 
 parser = reqparse.RequestParser()
 parser.add_argument('content', required=True)
-parser.add_argument('is_private', required=True, type=bool)
-parser.add_argument('username', required=True, type=int)
+parser.add_argument('private', required=True, type=bool)
+parser.add_argument('username', required=True)
 
 
 class NoteResource(Resource):
@@ -18,5 +18,23 @@ class NoteResource(Resource):
 		db_session.global_init("db.db")
 		abort_if_note_not_found(note_id)
 		session = db_session.create_session()
-		note = session.query(Note).get(note_id)
+		note = session.query(Note).filter(Note.private == False, Note.id == note_id).first()
 		return jsonify(note.to_dict())
+
+
+class NoteListResource(Resource):
+	def get(self):
+		db_session.global_init("db.db")
+		session = db_session.create_session()
+		notes = session.query(Note).filter(Note.private == False).all()
+		return jsonify([item for item in notes])
+
+	def post(self):
+		db_session.global_init("db.db")
+		args = parser.parse_args()
+		session = db_session.create_session()
+		note = Note(content=args['content'], private=args["private"], username=args["username"])
+		session.add(note)
+		session.commit()
+		return jsonify({"id": session.query(Note).filter(Note.username == note.username, Note.content == note.content,
+		                                          Note.private == note.private).first().id})
