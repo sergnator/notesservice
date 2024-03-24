@@ -45,6 +45,7 @@ class App(QMainWindow, MainForm):
 		self.next.clicked.connect(self.next_click)
 		self.back.clicked.connect(self.back_click)
 		self.edit_button.clicked.connect(self.edit_click)
+		self.delete_button.clicked.connect(self.delete)
 
 	def login_click(self):
 		name = self.name_field.text()
@@ -89,11 +90,18 @@ class App(QMainWindow, MainForm):
 		if self.main_tabs.currentWidget() == self.all_notes_tab:
 			self.back.setVisible(True)
 			self.next.setVisible(True)
+			self.delete_button.setVisible(True)
+			self.edit_button.setVisible(True)
+			if len(username.notes) == 0:
+				self.delete_button.setVisible(False)
+				self.edit_button.setVisible(False)
+				self.note_read_field_2.setText("")
+			else:
+				self.note_read_field_2.setText(username.notes[self.current_note_number].content)
 			if self.current_note_number == 0:
 				self.back.setVisible(False)
-			if self.current_note_number == len(username.notes) - 1:
+			if self.current_note_number >= len(username.notes) - 1:
 				self.next.setVisible(False)
-			self.note_read_field_2.setText(username.notes[self.current_note_number].content)
 		elif self.main_tabs.currentWidget() == self.logout_tab:
 			username = None
 			self.main_tabs.removeTab(self.main_tabs.indexOf(self.all_notes_tab))
@@ -128,6 +136,10 @@ class App(QMainWindow, MainForm):
 		self.send_button.clicked.disconnect()
 		self.send_button.clicked.connect(self.edit_click)
 		self.main_tabs.setCurrentWidget(self.all_notes_tab)
+
+	def delete(self):
+		del username.notes[self.current_note_number]
+		self.change_tab()
 
 
 if __name__ == '__main__':
