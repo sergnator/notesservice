@@ -143,6 +143,8 @@ class Ui_Form(object):
         self.edit_button = QtWidgets.QPushButton(self.all_notes_tab)
         self.edit_button.setGeometry(QtCore.QRect(510, 340, 75, 23))
         self.edit_button.setObjectName("edit_button")
+        self.logout_tab = QtWidgets.QWidget()
+        self.logout_tab.setObjectName("logout_tab")
 
         self.retranslateUi(Form)
         self.main_tabs.setCurrentIndex(2)
@@ -164,3 +166,4 @@ class Ui_Form(object):
         self.next.setText(_translate("Form", "->"))
         self.edit_button.setText(_translate("Form", "edit"))
         self.main_tabs.setTabText(self.main_tabs.indexOf(self.all_notes_tab), _translate("Form", "Your notes"))
+        self.main_tabs.setTabText(self.main_tabs.indexOf(self.logout_tab), _translate("Form", "Logout"))

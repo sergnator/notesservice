@@ -59,7 +59,8 @@ class App(QMainWindow, MainForm):
 			self.username_label_3.setText(username.username)
 			self.main_tabs.addTab(self.all_notes_tab, "")
 			self.main_tabs.setCurrentIndex(3)
-			self.login_tab.deleteLater()
+			self.main_tabs.removeTab(self.main_tabs.indexOf(self.login_tab))
+			self.main_tabs.addTab(self.logout_tab, "")
 			self.retranslateUi(self)
 			dialog = Message("Login successful")
 		dialog.show()
@@ -84,6 +85,7 @@ class App(QMainWindow, MainForm):
 		self.note_read_field.setText(note.content)
 
 	def change_tab(self):
+		global username
 		if self.main_tabs.currentWidget() == self.all_notes_tab:
 			self.back.setVisible(True)
 			self.next.setVisible(True)
@@ -92,6 +94,16 @@ class App(QMainWindow, MainForm):
 			if self.current_note_number == len(username.notes) - 1:
 				self.next.setVisible(False)
 			self.note_read_field_2.setText(username.notes[self.current_note_number].content)
+		elif self.main_tabs.currentWidget() == self.logout_tab:
+			username = None
+			self.main_tabs.removeTab(self.main_tabs.indexOf(self.all_notes_tab))
+			self.main_tabs.addTab(self.login_tab, "")
+			self.main_tabs.setCurrentIndex(2)
+			self.main_tabs.removeTab(self.main_tabs.indexOf(self.logout_tab))
+			self.retranslateUi(self)
+			self.username_label.setText("")
+			self.username_label_2.setText("")
+			self.username_label_3.setText("")
 
 	def next_click(self):
 		self.current_note_number += 1

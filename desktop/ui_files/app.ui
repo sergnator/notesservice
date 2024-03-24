@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>3</number>
+    <number>4</number>
    </property>
    <widget class="QWidget" name="wtite_tab">
     <attribute name="title">
@@ -310,6 +310,11 @@
       <string>edit</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QWidget" name="logout_tab">
+    <attribute name="title">
+     <string>Logout</string>
+    </attribute>
    </widget>
   </widget>
  </widget>
