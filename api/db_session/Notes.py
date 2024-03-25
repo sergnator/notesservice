@@ -9,4 +9,4 @@ class Note(SqlAlchemyBase, SerializerMixin):
 	id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
 	content = sqlalchemy.Column(sqlalchemy.String)
 	username = sqlalchemy.Column(sqlalchemy.String, sqlalchemy.ForeignKey("users.name"))
-	private = sqlalchemy.Column(sqlalchemy.Boolean)
+	private = sqlalchemy.Column(sqlalchemy.Boolean, default=False)

@@ -27,7 +27,7 @@ class NoteListResource(Resource):
 		db_session.global_init("db.db")
 		session = db_session.create_session()
 		notes = session.query(Note).filter(Note.private == False).all()
-		return jsonify([item for item in notes])
+		return jsonify([item.to_dict() for item in notes])
 
 	def post(self):
 		db_session.global_init("db.db")
@@ -36,5 +36,4 @@ class NoteListResource(Resource):
 		note = Note(content=args['content'], private=args["private"], username=args["username"])
 		session.add(note)
 		session.commit()
-		return jsonify({"id": session.query(Note).filter(Note.username == note.username, Note.content == note.content,
-		                                          Note.private == note.private).first().id})
+		return jsonify({"id": note.id})

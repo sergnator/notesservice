@@ -8,6 +8,8 @@ from db_session import db_session
 app = flask.Flask(__name__)
 api = Api(app)
 api.add_resource(note.NoteResource, "/api/v2/notes/<int:note_id>")
+api.add_resource(note.NoteListResource, "/api/v2/notes")
+
 db_session.global_init("db.db")
 note = Notes.Note(content="1245")
 session = db_session.create_session()
