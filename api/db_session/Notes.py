@@ -8,5 +8,5 @@ class Note(SqlAlchemyBase, SerializerMixin):
 
 	id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
 	content = sqlalchemy.Column(sqlalchemy.String)
-	username = sqlalchemy.Column(sqlalchemy.String, sqlalchemy.ForeignKey("users.name"))
+	user_id = sqlalchemy.Column(sqlalchemy.String, sqlalchemy.ForeignKey("users.id"))
 	private = sqlalchemy.Column(sqlalchemy.Boolean, default=False)

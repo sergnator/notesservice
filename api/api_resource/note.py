@@ -10,7 +10,7 @@ from api.db_session.Notes import Note
 parser = reqparse.RequestParser()
 parser.add_argument('content', required=True)
 parser.add_argument('private', required=True, type=bool)
-parser.add_argument('username', required=True)
+parser.add_argument('user_id', required=True)
 
 
 class NoteResource(Resource):
@@ -33,7 +33,7 @@ class NoteListResource(Resource):
 		db_session.global_init("db.db")
 		args = parser.parse_args()
 		session = db_session.create_session()
-		note = Note(content=args['content'], private=args["private"], username=args["username"])
+		note = Note(content=args['content'], private=args["private"], user_id=args["user_id"])
 		session.add(note)
 		session.commit()
 		return jsonify({"id": note.id})
