@@ -19,6 +19,12 @@ parser2 = reqparse.RequestParser()  # для парса аргументов ю�
 parser2.add_argument("username", required=True)
 parser2.add_argument("password", required=True)
 
+parser3 = reqparse.RequestParser()  # для парса аргументов и юзера и заметок
+parser3.add_argument("username", required=True)
+parser3.add_argument("password", required=True)
+parser3.add_argument("content", required=True)
+parser3.add_argument("private", required=True, type=bool)
+
 
 class NoteResource(Resource):  # ресурс для заметки с параметрами
 	def get(self, note_id):  # отправляет заметку если она не приватная по айди
@@ -44,6 +50,22 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
 				session.commit()
 				return jsonify({"message": f"note {note_id} deleted", "code": NOTFOUND})
 		return jsonify({"message": "note not found", "code": NOTFOUND})
+
+	def put(self, note_id):
+		db_session.global_init("db.db")
+		abort_if_note_not_found(note_id)
+		session = db_session.create_session()
+		args = parser3.parse_args()
+		user = session.query(User).filter(User.name == args["username"], User.password == args["password"]).first()
+		if not user:
+			return jsonify({"message": "username or password - wrong", "code": NOTFOUND})
+		for note in user.notes:
+			if note.id == note_id:
+				note.content = args["content"]
+				note.private = args["private"]
+				session.commit()
+				return jsonify({"message": f"note {note_id} change", "code": OK})
+		return jsonify({"message": f"note {note_id} not found", "code": NOTFOUND})
 
 
 class NoteListResource(Resource):  # ресурс для заметок без параметров
