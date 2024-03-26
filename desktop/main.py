@@ -9,7 +9,7 @@ from interface.message_interface import Ui_Form as MessageForm
 
 from api.Notes import Note
 from api.Users import User
-from api.api_com import login, delete
+from api.api_com import login, delete, edit_note
 
 from tests.test_data.data import *
 
@@ -139,9 +139,13 @@ class App(QMainWindow, MainForm):
 	def edit_send_click(self):
 		user_global.notes[self.current_note_number].content = self.note_write_field.toPlainText()
 		user_global.notes[self.current_note_number].private = self.is_private.isChecked()
+		res = edit_note(user_global.notes[self.current_note_number], user_global)
 		self.send_button.clicked.disconnect()
 		self.send_button.clicked.connect(self.edit_click)
 		self.main_tabs.setCurrentWidget(self.all_notes_tab)
+		mes = Message(f"{res['message']}")
+		mes.show()
+		mes.exec_()
 
 	def delete(self):
 		delete(user_global, user_global.notes[self.current_note_number].id)
