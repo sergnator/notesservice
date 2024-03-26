@@ -18,7 +18,7 @@ def login(user: dict):
 	return User.from_dict(user_dict)
 
 
-def get_note_by_id(id):
+def get_note_by_id(id):  # TODO надо
 	res = requests.get(api_host + "notes", params={"id": id})
 	return res.json()
 
@@ -32,7 +32,7 @@ def post_note(note: dict, _user):
 	return Note.from_dict(note)
 
 
-def edit_note(note: Note):
+def edit_note(note: Note):  # TODO: желательно в будующем(:
 	res = requests.put(api_host + "notes", json=note.to_dict())
 	return res
 
@@ -42,3 +42,4 @@ print(requests.post("http://127.0.0.1:5000/api/v2/users",
 user = login({"username": "1123", "password": "123"})
 note1 = post_note({"user_id": user.id, "private": False, "content": "first"}, user)
 print(user.notes[0].content)
+print(login({"username": "1123", "password": "123"}).notes)

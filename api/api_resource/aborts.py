@@ -6,7 +6,8 @@ from api.db_session.Users import User
 
 from .codes_error import *
 
-def abort_if_note_not_found(note_id):
+
+def abort_if_note_not_found(note_id):  # если заметка не найдена
 	db_session.global_init("db.db")
 	session = db_session.create_session()
 	note = session.query(Note).filter(Note.private == False, Note.id == note_id).first()
@@ -14,7 +15,7 @@ def abort_if_note_not_found(note_id):
 		abort(404, message=f"Note {note_id} not found", code=NOTFOUND)
 
 
-def abort_if_user_not_found(username):
+def abort_if_user_not_found(username):  # если пользователь не найден
 	db_session.global_init("db.db")
 	session = db_session.create_session()
 	user = session.query(User).filter(User.name == username).first()

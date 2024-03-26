@@ -8,14 +8,14 @@ from api.db_session.Users import User
 from .aborts import abort_if_user_not_found
 from .codes_error import *
 
-parser = reqparse.RequestParser()
+parser = reqparse.RequestParser()  # для парса аргументов
 parser.add_argument('username', required=True)
 parser.add_argument('password', required=True)
 parser.add_argument('notes', type=dict, action="append")
 
 
-class UserResource(Resource):
-	def get(self, username):
+class UserResource(Resource):  # ресурс для юзера с параметрами
+	def get(self, username):  # возвращает все не приватные заметки пользователя
 		abort_if_user_not_found(username)
 		session = db_session.create_session()
 		user = session.query(User).filter(User.name == username).first()
@@ -27,7 +27,7 @@ class UserResource(Resource):
 
 
 class UserNoParamResource(Resource):
-	def post(self):
+	def post(self):  # создаёт пользователя
 		db_session.global_init("db.db")
 		args = parser.parse_args()
 		session = db_session.create_session()
