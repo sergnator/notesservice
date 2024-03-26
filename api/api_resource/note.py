@@ -33,7 +33,9 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
 		session = db_session.create_session()
 		note = session.query(Note).filter(Note.private == False, Note.id == note_id).first()
 		if note:
-			return jsonify(note.to_dict())
+			_dict = note.to_dict()
+			_dict.update({"code": OK})
+			return jsonify(_dict)
 		return jsonify({"message": f"note {note_id} not found", "code": NOTFOUND})
 
 	def delete(self, note_id):

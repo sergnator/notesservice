@@ -19,9 +19,11 @@ def login(_user: dict):
 	return User.from_dict(user_dict)
 
 
-def get_note_by_id(id):  # TODO надо
-	res = requests.get(api_host + "notes", params={"id": id})
-	return res.json()
+def get_note_by_id(_id):
+	res = requests.get(api_host + f"notes/{_id}").json()
+	if res["code"] == OK:
+		return Note.from_dict({"content": res["content"], "private": False})
+	return res
 
 
 def post_note(note: dict, _user):

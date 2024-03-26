@@ -9,7 +9,7 @@ from interface.message_interface import Ui_Form as MessageForm
 
 from api.Notes import Note
 from api.Users import User
-from api.api_com import login, delete, edit_note
+from api.api_com import login, delete, edit_note, get_note_by_id
 
 from tests.test_data.data import *
 
@@ -84,10 +84,14 @@ class App(QMainWindow, MainForm):
 		dialog.exec_()
 
 	def read_click(self):
-		id = self.search_id_field.text()
-		res = test_result_of_read  # если is_private True то запрос не должен приходить, либо заменить можно content
-		note = Note.from_dict(res)
-		self.note_read_field.setText(note.content)
+		_id = self.search_id_field.text()
+		res = get_note_by_id(_id)
+		if isinstance(res, Note):
+			self.note_read_field.setText(res.content)
+			return
+		mes = Message(res["message"])
+		mes.show()
+		mes.exec_()
 
 	def change_tab(self):
 		global user_global
