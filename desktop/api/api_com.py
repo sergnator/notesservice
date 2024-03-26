@@ -36,3 +36,7 @@ def post_note(note: dict, _user):
 def edit_note(note: Note):  # TODO: желательно в будующем(:
 	res = requests.put(api_host + "notes", json=note.to_dict())
 	return res
+
+
+def delete(user: User, note_id):
+	res = requests.delete(api_host + f"notes/{note_id}", json={"username": user.username, "password": user.password})

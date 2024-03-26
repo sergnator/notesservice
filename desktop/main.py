@@ -9,7 +9,7 @@ from interface.message_interface import Ui_Form as MessageForm
 
 from api.Notes import Note
 from api.Users import User
-from api.api_com import login
+from api.api_com import login, delete
 
 from tests.test_data.data import *
 
@@ -144,6 +144,7 @@ class App(QMainWindow, MainForm):
 		self.main_tabs.setCurrentWidget(self.all_notes_tab)
 
 	def delete(self):
+		delete(user_global, user_global.notes[self.current_note_number].id)
 		del user_global.notes[self.current_note_number]
 		self.change_tab()
 
