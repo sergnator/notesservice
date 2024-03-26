@@ -9,7 +9,6 @@ from interface.message_interface import Ui_Form as MessageForm
 
 from api.Notes import Note
 from api.Users import User
-from api.Base import Descripter
 from api.api_com import login
 
 from tests.test_data.data import *
@@ -93,6 +92,8 @@ class App(QMainWindow, MainForm):
 	def change_tab(self):
 		global user_global
 		if self.main_tabs.currentWidget() == self.all_notes_tab:
+			global user_global
+			user_global = login({"username": user_global.username, "password": user_global.password})
 			self.back.setVisible(True)
 			self.next.setVisible(True)
 			self.delete_button.setVisible(True)

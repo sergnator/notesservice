@@ -36,5 +36,3 @@ def post_note(note: dict, _user):
 def edit_note(note: Note):  # TODO: желательно в будующем(:
 	res = requests.put(api_host + "notes", json=note.to_dict())
 	return res
-
-
