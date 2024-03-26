@@ -9,10 +9,10 @@ from interface.message_interface import Ui_Form as MessageForm
 
 from api.Notes import Note
 from api.Users import User
+from api.Base import Descripter
 from api.api_com import login
 
 from tests.test_data.data import *
-
 
 if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
 	QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -20,7 +20,7 @@ if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
 if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
 	QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
-username: None | User = None
+user_global: None | User = None
 
 
 class Message(QDialog, MessageForm):
@@ -53,19 +53,22 @@ class App(QMainWindow, MainForm):
 		name = self.name_field.text()
 		password = self.password_field.text()
 		# отправка данных
-		dialog = Message("Login failed")
-		if name == '123' and password == '123':  # аналог проверки данных
-			global username
-			username = User.from_dict(user_test)
-			self.username_label.setText(username.username)
-			self.username_label_2.setText(username.username)
-			self.username_label_3.setText(username.username)
+
+		global user_global
+		user = login({"username": name, "password": password})
+		if isinstance(user, User):
+			user_global = user
+			self.username_label.setText(user_global.username)
+			self.username_label_2.setText(user_global.username)
+			self.username_label_3.setText(user_global.username)
 			self.main_tabs.addTab(self.all_notes_tab, "")
 			self.main_tabs.setCurrentIndex(3)
 			self.main_tabs.removeTab(self.main_tabs.indexOf(self.login_tab))
 			self.main_tabs.addTab(self.logout_tab, "")
 			self.retranslateUi(self)
 			dialog = Message("Login successful")
+		else:
+			dialog = Message(user["message"])
 		dialog.show()
 		dialog.exec_()
 		self.name_field.setText("")
@@ -88,24 +91,24 @@ class App(QMainWindow, MainForm):
 		self.note_read_field.setText(note.content)
 
 	def change_tab(self):
-		global username
+		global user_global
 		if self.main_tabs.currentWidget() == self.all_notes_tab:
 			self.back.setVisible(True)
 			self.next.setVisible(True)
 			self.delete_button.setVisible(True)
 			self.edit_button.setVisible(True)
-			if len(username.notes) == 0:
+			if len(user_global.notes) == 0:
 				self.delete_button.setVisible(False)
 				self.edit_button.setVisible(False)
 				self.note_read_field_2.setText("")
 			else:
-				self.note_read_field_2.setText(username.notes[self.current_note_number].content)
+				self.note_read_field_2.setText(user_global.notes[self.current_note_number].content)
 			if self.current_note_number == 0:
 				self.back.setVisible(False)
-			if self.current_note_number >= len(username.notes) - 1:
+			if self.current_note_number >= len(user_global.notes) - 1:
 				self.next.setVisible(False)
 		elif self.main_tabs.currentWidget() == self.logout_tab:
-			username = None
+			user_global = None
 			self.main_tabs.removeTab(self.main_tabs.indexOf(self.all_notes_tab))
 			self.main_tabs.addTab(self.login_tab, "")
 			self.main_tabs.setCurrentIndex(2)
@@ -124,8 +127,8 @@ class App(QMainWindow, MainForm):
 		self.change_tab()
 
 	def edit_click(self):
-		content = username.notes[self.current_note_number].content
-		private = username.notes[self.current_note_number].private
+		content = user_global.notes[self.current_note_number].content
+		private = user_global.notes[self.current_note_number].private
 		self.main_tabs.setCurrentIndex(0)
 		self.note_write_field.setText(content)
 		self.is_private.setChecked(private)
@@ -133,14 +136,14 @@ class App(QMainWindow, MainForm):
 		self.send_button.clicked.connect(self.edit_send_click)
 
 	def edit_send_click(self):
-		username.notes[self.current_note_number].content = self.note_write_field.toPlainText()
-		username.notes[self.current_note_number].private = self.is_private.isChecked()
+		user_global.notes[self.current_note_number].content = self.note_write_field.toPlainText()
+		user_global.notes[self.current_note_number].private = self.is_private.isChecked()
 		self.send_button.clicked.disconnect()
 		self.send_button.clicked.connect(self.edit_click)
 		self.main_tabs.setCurrentWidget(self.all_notes_tab)
 
 	def delete(self):
-		del username.notes[self.current_note_number]
+		del user_global.notes[self.current_note_number]
 		self.change_tab()
 
 

@@ -1,17 +1,18 @@
-from Constans import *
+from .Constans import *
 
-from desktop.api.Users import User
-from desktop.api.Notes import Note
+from .Users import User
+from .Notes import Note
 
 import requests
 
 
 def login(user: dict):
+	# принимает словарь типа {"username": "username", "password": "123456", notes(не обязательный): [Notes]"}
 	res = requests.get(api_host + "users", json=user).json()
 	if res["code"] != OK:
 		return res
 	user_dict = dict()
-	user_dict["notes"] = [Note.from_dict(note) for note in res["notes"]]
+	user_dict["notes"] = res["notes"]
 	user_dict["username"] = user["username"]
 	user_dict["password"] = user["password"]
 	user_dict["id"] = res["user_id"]
@@ -28,7 +29,7 @@ def post_note(note: dict, _user):
 	if res["code"] != OK:
 		return res
 	note["id"] = res["id"]
-	user.notes.append(Note.from_dict(note))
+	_user.notes.append(Note.from_dict(note))
 	return Note.from_dict(note)
 
 
@@ -37,9 +38,3 @@ def edit_note(note: Note):  # TODO: желательно в будующем(:
 	return res
 
 
-print(requests.post("http://127.0.0.1:5000/api/v2/users",
-                    json={"username": "1123", "password": "123"}).json())  # create user
-user = login({"username": "1123", "password": "123"})
-note1 = post_note({"user_id": user.id, "private": False, "content": "first"}, user)
-print(user.notes[0].content)
-print(login({"username": "1123", "password": "123"}).notes)
