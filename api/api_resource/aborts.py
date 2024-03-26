@@ -10,7 +10,7 @@ from .codes_error import *
 def abort_if_note_not_found(note_id):  # если заметка не найдена
 	db_session.global_init("db.db")
 	session = db_session.create_session()
-	note = session.query(Note).filter(Note.private == False, Note.id == note_id).first()
+	note = session.query(Note).filter(Note.id == note_id).first()
 	if not note:
 		abort(404, message=f"Note {note_id} not found", code=NOTFOUND)
 

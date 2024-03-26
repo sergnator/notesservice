@@ -26,7 +26,9 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
 		abort_if_note_not_found(note_id)
 		session = db_session.create_session()
 		note = session.query(Note).filter(Note.private == False, Note.id == note_id).first()
-		return jsonify(note.to_dict())
+		if note:
+			return jsonify(note.to_dict())
+		return jsonify({"message": f"note {note_id} not found", "code": NOTFOUND})
 
 	def delete(self, note_id):
 		db_session.global_init("db.db")
@@ -39,7 +41,9 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
 		for note in user.notes:
 			if note.id == note_id:
 				session.delete(note)
-				return jsonify({"message": "note not found", "code": NOTFOUND})
+				session.commit()
+				return jsonify({"message": f"note {note_id} deleted", "code": NOTFOUND})
+		return jsonify({"message": "note not found", "code": NOTFOUND})
 
 
 class NoteListResource(Resource):  # ресурс для заметок без параметров
