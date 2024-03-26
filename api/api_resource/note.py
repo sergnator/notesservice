@@ -1,11 +1,13 @@
 from flask_restful import reqparse, abort, Api, Resource
 from flask import jsonify
 
-from api.db_session import db_session
 from .aborts import abort_if_note_not_found
-from api.db_session import db_session
 
+from api.db_session import db_session
+from api.db_session import db_session
 from api.db_session.Notes import Note
+
+from .codes_error import *
 
 parser = reqparse.RequestParser()
 parser.add_argument('content', required=True)
@@ -36,4 +38,4 @@ class NoteListResource(Resource):
 		note = Note(content=args['content'], private=args["private"], user_id=args["user_id"])
 		session.add(note)
 		session.commit()
-		return jsonify({"id": note.id})
+		return jsonify({"id": note.id, "code": OK})

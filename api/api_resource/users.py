@@ -50,6 +50,6 @@ class UserNoParamResource(Resource):
 		session = db_session.create_session()
 		user = session.query(User).filter(User.name == args["username"], User.password == args["password"]).first()
 		if user:
-			return {"notes": [note.to_dict() for note in user.notes], "code": OK}
+			return {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id}
 		return jsonify({"message": "username or password - wrong", "code": NOTFOUND})
 

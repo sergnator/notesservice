@@ -6,13 +6,14 @@ import json
 class Note(Descripter):
 	"""на вход объект на подобии:
 		{
-		"username": "name of user",
+		"user_id": id,
 		"content": "all text of note",
 		"private": false || true
 		}"""
-	username = None
+	user_id = None
 	content = None
 	private = False
+	id = None
 
 	@staticmethod
 	def from_dict(_dict):  # получает словарь и возвращает экземпляр класса
@@ -23,4 +24,4 @@ class Note(Descripter):
 		return Note.from_json(json.loads(js))
 
 	def to_dict(self):
-		return {"username": self.username, "content": self.content, "private": self.private}
+		return {"username": self.user_id, "content": self.content, "private": self.private, "id": self.id}
