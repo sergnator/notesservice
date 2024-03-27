@@ -26,8 +26,10 @@ def get_note_by_id(_id):
 	return res
 
 
-def post_note(note: dict, _user):
-	res = requests.post(api_host + "notes", json=note).json()
+def create_note(note: dict, _user: User):
+	_dict = note.copy()
+	_dict.update({"username": _user.username, "password": _user.password})
+	res = requests.post(api_host + "notes", json=_dict).json()
 	if res["code"] != OK:
 		return res
 	note["id"] = res["id"]

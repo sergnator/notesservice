@@ -18,7 +18,7 @@ print(get('http://127.0.0.1:5000/api/v2/users',
           json={"username": "test1", "password": "123456"}).json())  # all user's notes
 
 print(post('http://127.0.0.1:5000/api/v2/notes',
-           json={'content': "something", "private": False, "user_id": 1}).json())  # create note
+           json={'content': "something", "private": False, "username": "test1", "password": "123456"}).json())  # create note
 print(get("http://127.0.0.1:5000/api/v2/users/test1").json())  # all user's notes not private
 
 

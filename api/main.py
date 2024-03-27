@@ -3,10 +3,6 @@ from flask_restful import Api
 from api_resource import note
 from api_resource import users
 
-from db_session import Notes
-from db_session import db_session
-from db_session import Users
-
 app = flask.Flask(__name__)
 api = Api(app)
 

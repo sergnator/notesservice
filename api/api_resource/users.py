@@ -23,6 +23,7 @@ class UserResource(Resource):  # ресурс для юзера с параме�
 		for note in user.notes:
 			if not note.private:
 				notes.append(note)
+		session.close()
 		return jsonify({"notes": [note.to_dict() for note in notes], "code": OK})
 
 
@@ -40,6 +41,7 @@ class UserNoParamResource(Resource):
 					notes=[Note(content=note['content'], private=note["private"]) for note in args["notes"]])
 		session.add(user)
 		session.commit()
+		session.close()
 		return jsonify({"id": user.id, "code": OK})
 
 	def get(self):
@@ -51,5 +53,6 @@ class UserNoParamResource(Resource):
 		user = session.query(User).filter(User.name == args["username"], User.password == args["password"]).first()
 		if user:
 			return {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id}
-		return jsonify({"message": "username or password - wrong", "code": NOTFOUND})
+		session.close()
+		return jsonify({"message": "username or password - wrong", "code": WRONG_PASSWORD_USERNAME})
 

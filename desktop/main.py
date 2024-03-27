@@ -9,7 +9,7 @@ from interface.message_interface import Ui_Form as MessageForm
 
 from api.Notes import Note
 from api.Users import User
-from api.api_com import login, delete, edit_note, get_note_by_id
+from api.api_com import login, delete, edit_note, get_note_by_id, create_note
 
 from tests.test_data.data import *
 
@@ -76,14 +76,18 @@ class App(QMainWindow, MainForm):
 	def send_click(self):
 		content = self.note_write_field.toPlainText()
 		is_private = self.is_private.isChecked()
-		res = test_result_of_write  # типа запрос
-		dialog = Message("Error")
-		if res["result"]:
-			dialog = Message("The note was created successfully, you can get it by ID: " + res["id"])
-		dialog.show()
-		dialog.exec_()
+		res = create_note({"content": content, "private": is_private}, user_global)
+		if isinstance(res, Note):
+			dialog = Message("The note was created successfully, you can get it by ID, if private false: " + str(res.id))
+			dialog.show()
+			dialog.exec_()
+			self.main_tabs.setCurrentIndex(1)
+		else:
+			dialog = Message(res["message"])
+			dialog.show()
+			dialog.exec_()
 
-	def read_click(self):
+	def read_click(self, id=None):
 		_id = self.search_id_field.text()
 		res = get_note_by_id(_id)
 		if isinstance(res, Note):
