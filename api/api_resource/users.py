@@ -41,8 +41,9 @@ class UserNoParamResource(Resource):
 					notes=[Note(content=note['content'], private=note["private"]) for note in args["notes"]])
 		session.add(user)
 		session.commit()
+		_id = user.id
 		session.close()
-		return jsonify({"id": user.id, "code": OK})
+		return jsonify({"id": _id, "code": OK})
 
 	def get(self):
 		db_session.global_init("db.db")

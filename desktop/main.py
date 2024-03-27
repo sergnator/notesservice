@@ -158,6 +158,7 @@ class App(QMainWindow, MainForm):
 	def delete(self):
 		delete(user_global, user_global.notes[self.current_note_number].id)
 		del user_global.notes[self.current_note_number]
+		self.current_note_number = 0
 		self.change_tab()
 
 
