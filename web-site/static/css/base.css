@@ -1,0 +1,17 @@
+.wrapper{
+    width: 2000px;
+    margin: auto;
+}
+.nav{
+    border-bottom: 1px solid #c4c4c4;
+    margin-bottom: 10px;
+    margin-left: 10px;
+}
+#login{
+    margin-right: 100px;
+    color: #695eff;
+    text-decoration: none;
+}
+#login:hover{
+    text-decoration: underline;
+}
