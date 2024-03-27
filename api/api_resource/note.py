@@ -75,7 +75,7 @@ class NoteListResource(Resource):  # ресурс для заметок без �
 		db_session.global_init("db.db")
 		session = db_session.create_session()
 		notes = session.query(Note).filter(Note.private == False).all()
-		return jsonify([item.to_dict() for item in notes])
+		return jsonify({"notes": [item.to_dict() for item in notes], "code": OK})
 
 	def post(self):  # создаёт заметку
 		db_session.global_init("db.db")
