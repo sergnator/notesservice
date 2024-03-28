@@ -8,16 +8,16 @@ from .codes_error import *
 
 
 def abort_if_note_not_found(note_id):  # если заметка не найдена
-	db_session.global_init("db.db")
-	session = db_session.create_session()
-	note = session.query(Note).filter(Note.id == note_id).first()
-	if not note:
-		abort(404, message=f"Note {note_id} not found", code=NOTFOUND)
+    db_session.global_init("db.db")
+    session = db_session.create_session()
+    note = session.query(Note).filter(Note.id == note_id).first()
+    if not note:
+        abort(404, message=f"Note {note_id} not found", code=NOTFOUND)
 
 
 def abort_if_user_not_found(username):  # если пользователь не найден
-	db_session.global_init("db.db")
-	session = db_session.create_session()
-	user = session.query(User).filter(User.name == username).first()
-	if not user:
-		abort(404, message=f"User {username} not found", code=NOTFOUND)
+    db_session.global_init("db.db")
+    session = db_session.create_session()
+    user = session.query(User).filter(User.name == username).first()
+    if not user:
+        abort(404, message=f"User {username} not found", code=NOTFOUND)

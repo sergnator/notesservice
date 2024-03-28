@@ -25,7 +25,8 @@ class User(Descripter):  # класс пользователя
     def from_dict(_dict: dict):  # получает словарь и возвращает экземпляр класса
         _dict = _dict.copy()
         if "notes" in _dict.keys():
-            _dict["notes"] = [Note.from_dict(el) for el in _dict["notes"]]  # первращение всех dict of note в экземпляр Note
+            _dict["notes"] = [Note.from_dict(el) for el in
+                              _dict["notes"]]  # первращение всех dict of note в экземпляр Note
         return User(_dict)
 
     @staticmethod

@@ -12,5 +12,4 @@ api.add_resource(users.UserResource, "/api/v2/users/<username>")
 api.add_resource(users.UserNoParamResource, "/api/v2/users")
 
 
-
 app.run()
