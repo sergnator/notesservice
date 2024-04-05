@@ -59,9 +59,10 @@ class UserNoParamResource(Resource):
 
 
 class UserNameResource(Resource):
-    def get(self, id):
+    def get(self, note_id):
+        db_session.global_init("db.db")
         session = db_session.create_session()
-        user = session.query(User).filter(User.id == id).first()
+        user = session.query(User).filter(User.id == note_id).first()
         if not user:
             return jsonify({"message": "user not found", "code": NOTFOUND})
         username = user.name

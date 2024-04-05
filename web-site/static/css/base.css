@@ -15,3 +15,6 @@
 #login:hover{
     text-decoration: underline;
 }
+.logout:hover{
+    color: red !important;
+}
