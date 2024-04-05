@@ -10,7 +10,7 @@ class User(Descripter):  # класс пользователя
         "username": "username",
         "password": "123456",
         "notes": [
-            {"name": "name of note",
+            {
             "username": "username",
             "content": "all text of note",
             "private": false || true},

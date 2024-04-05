@@ -8,14 +8,10 @@ app.config['SECRET_KEY'] = 'mega_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-users: list[User] = []
-
 
 @login_manager.user_loader
 def load_user(user_id):
-    for user in users:
-        if user.id == user_id:
-            return user
+    return get_name(user_id)
 
 
 @app.route("/login", methods=["GET", "POST"])

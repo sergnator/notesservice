@@ -46,3 +46,15 @@ def edit_note(note: Note, _user: User):
 
 def delete(_user: User, note_id):
     res = requests.delete(api_host + f"notes/{note_id}", json={"username": _user.username, "password": _user.password})
+
+
+def get_name(user_id):
+    res = requests.get(api_host + f"username/{user_id}").json()
+    if res["code"] != OK:
+        return res["message"]
+    final = dict()
+    final["username"] = res["username"]
+    final["password"] = "123456"
+    final["id"] = user_id
+    final["notes"] = []
+    return User.from_dict(res)
