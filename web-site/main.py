@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect
 from flask_login import LoginManager
+from flask_login import login_user as login_user_flask
 from api import *
 from forms import LoginForm
 
@@ -15,9 +16,12 @@ def load_user(user_id):
 
 
 @app.route("/login", methods=["GET", "POST"])
-def login():
+def login_():
     form = LoginForm()
     if form.validate_on_submit():
+        user = login({"username": form.username.data, "password": form.password})
+        if isinstance(user, User):
+            login_user_flask(user)
         return redirect("/")
     return render_template("login.html", title="Login", form=form)
 
