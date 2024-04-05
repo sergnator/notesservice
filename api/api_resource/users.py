@@ -56,3 +56,14 @@ class UserNoParamResource(Resource):
             return {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id}
         session.close()
         return jsonify({"message": "username or password - wrong", "code": WRONG_PASSWORD_USERNAME})
+
+
+class UserNameResource(Resource):
+    def get(self, id):
+        session = db_session.create_session()
+        user = session.query(User).filter(User.id == id).first()
+        if not user:
+            return jsonify({"message": "user not found", "code": NOTFOUND})
+        username = user.name
+        session.close()
+        return jsonify({"username": username, "code": OK})
