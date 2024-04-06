@@ -23,7 +23,7 @@ def get_note_by_id(_id):
     res = requests.get(api_host + f"notes/{_id}").json()
     if res["code"] == OK:
         return Note.from_dict({"content": res["content"], "private": False})
-    return res
+    return res['message']
 
 
 def create_note(note: dict, _user: User):
@@ -31,7 +31,7 @@ def create_note(note: dict, _user: User):
     _dict.update({"username": _user.username, "password": _user.password})
     res = requests.post(api_host + "notes", json=_dict).json()
     if res["code"] != OK:
-        return res
+        return res['message']
     note["id"] = res["id"]
     _user.notes.append(Note.from_dict(note))
     return Note.from_dict(note)

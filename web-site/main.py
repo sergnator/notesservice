@@ -22,13 +22,21 @@ def login_():
         user = login({"username": form.username.data, "password": form.password.data})
         if isinstance(user, User):
             login_user_flask(user)
-        return redirect("/")
-    return render_template("login.html", title="Login", form=form)
+            return redirect("/")
+        return render_template("login.html", title="Login", form=form, error=user)
+    return render_template("login.html", title="Login", form=form, error="None")
 
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def registration():
-    return render_template("registration.html", title="Register")
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = register({"username": form.username.data, "password": form.password.data})
+        if isinstance(user, User):
+            login_user_flask(user)
+            return redirect("/")
+        return render_template("registration.html", title="Register", form=form, error=user)
+    return render_template("registration.html", title="Register", error="None", form=form)
 
 
 @app.route("/logout")
@@ -40,7 +48,6 @@ def logout_():
 @app.route("/")
 @app.route("/index")
 def index():
-    print(current_user)
     return render_template("base.html", title="Home", current_user=current_user)
 
 

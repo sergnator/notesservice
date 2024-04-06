@@ -43,7 +43,7 @@ class UserNoParamResource(Resource):
         session.commit()
         _id = user.id
         session.close()
-        return jsonify({"id": _id, "code": OK})
+        return jsonify({"id": _id, "code": OK, "message": "user created"})
 
     def get(self):
         db_session.global_init("db.db")

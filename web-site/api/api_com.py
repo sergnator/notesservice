@@ -10,7 +10,7 @@ def login(_user: dict):
     # принимает словарь типа {"username": "username", "password": "123456", notes(не обязательный): [Notes]"}
     res = requests.get(api_host + "users", json=_user).json()
     if res["code"] != OK:
-        return res
+        return res['message']
     user_dict = dict()
     user_dict["notes"] = res["notes"]
     user_dict["username"] = _user["username"]
@@ -58,3 +58,12 @@ def get_name(user_id):
     final["id"] = user_id
     final["notes"] = []
     return User.from_dict(res)
+
+
+def register(_user: dict):
+    res = requests.post(api_host + f"users", json=_user).json()
+    if res["code"] != OK:
+        return res["message"]
+    user_dict = _user.copy()
+    user_dict["id"] = res["id"]
+    return User.from_dict(user_dict)
