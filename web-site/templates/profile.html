@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+    <link rel="stylesheet" href={{ url_for('static', filename='css/main.css') }}>
+    {% for note in notes %}
+        <div class="card card-wrap" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">Id: {{ note.id }}</h5>
+                <p class="card-text">{{ note.content }}</p>
+                <a class="btn btn-primary" href="/edit/{{ note.id }}">Edit</a>
+                <a href="/delete/{{ note.id }}" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

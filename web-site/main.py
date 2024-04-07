@@ -64,8 +64,9 @@ def create():
         res = create_note(note, user)  # создаём заметку
         if not isinstance(res, Note):
             return render_template("create.html", title="Create Note", form=form,
-                                   error=res)  # выводим сообщение об ошибке
-    return render_template("create.html", title="Create", form=form, error="None")
+                                   error=res, value="Create")  # выводим сообщение об ошибке
+        return redirect(url_for('index'))
+    return render_template("create.html", title="Create", form=form, error="None", value="Create")
 
 
 @app.route("/read", methods=["GET", "POST"])
@@ -90,9 +91,47 @@ def logout_():
 
 @app.route("/")
 @app.route("/index")
-@login_required
 def index():
+    if current_user.is_authenticated:
+        user = login({"username": current_user.username, "password": request.cookies.get("password")})
+        notes = user.notes
+        return render_template("profile.html", title="Profile", current_user=current_user, notes=notes)
     return render_template("base.html", title="Home", current_user=current_user)
+
+
+@app.route("/delete/<int:id>")
+@login_required
+def delete_(id):
+    delete(User.from_dict({"username": current_user.username, "password": request.cookies.get("password")}), id)
+    return redirect(url_for('index'))
+
+
+@app.route("/edit/<int:id>", methods=["GET", "POST"])
+@login_required
+def edit_(id):
+    user = login({"username": current_user.username, "password": request.cookies.get("password")})
+    form = WriteNoteForm()
+    if form.validate_on_submit():
+        for note in user.notes:
+            if note.id == id:
+                note.content = form.content.data
+                note.private = form.is_private.data
+                edit_note(note, user)
+                return redirect("/")
+    if isinstance(user, User):
+        for note in user.notes:
+            if note.id == id:
+                form.content.data = note.content
+                form.is_private.data = note.private
+                break
+        else:
+            return render_template("create.html", title="Create Note", form=form, current_user=current_user,
+                                   error=f"Note {id} not found", value="Edit")
+    else:
+        return render_template("create.html", title="Create Note", form=form, current_user=current_user, error=user,
+                               value="Edit")
+    return render_template("create.html", title="Edit Note", form=form, current_user=current_user, error="None",
+                           value="Edit")
 
 
 @app.after_request

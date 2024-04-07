@@ -45,7 +45,7 @@ class UserNoParamResource(Resource):
         session.close()
         return jsonify({"id": _id, "code": OK, "message": "user created"})
 
-    def get(self):
+    def get(self):  # возвращает всю информацию о пользователе
         db_session.global_init("db.db")
         args = parser.parse_args()
         if args["notes"] is not None:
@@ -59,7 +59,7 @@ class UserNoParamResource(Resource):
 
 
 class UserNameResource(Resource):
-    def get(self, note_id):
+    def get(self, note_id): # возвращает имя пользователя
         db_session.global_init("db.db")
         session = db_session.create_session()
         user = session.query(User).filter(User.id == note_id).first()

@@ -9,7 +9,7 @@
         <p>
             {{ form.content(class="form-control", rows=10) }}
         </p>
-        <p>{{ form.submit(type="submit", class="btn btn-primary", value="Create") }}</p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary", value=value) }}</p>
         {% if error != "None" %}
             <div class="alert alert-danger" role="alert"> error</div>
         {% endif %}

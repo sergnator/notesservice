@@ -19,3 +19,4 @@ class WriteNoteForm(FlaskForm):  # форма для создания(поиск
 class ReadNoteForm(FlaskForm):
     search_field = StringField('Search', validators=[DataRequired()])
     submit = SubmitField('Search')
+
