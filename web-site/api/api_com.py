@@ -8,9 +8,10 @@ import requests
 
 def login(_user: dict):
     # принимает словарь типа {"username": "username", "password": "123456", notes(не обязательный): [Notes]"}
+    # проверяет если в базе данных такой пользователь
     res = requests.get(api_host + "users", json=_user).json()
     if res["code"] != OK:
-        return res['message']
+        return res['message']  # сообщение об ошибке
     user_dict = dict()
     user_dict["notes"] = res["notes"]
     user_dict["username"] = _user["username"]
@@ -20,39 +21,41 @@ def login(_user: dict):
 
 
 def get_note_by_id(_id):
+    # получаем заметку
     res = requests.get(api_host + f"notes/{_id}").json()
     if res["code"] == OK:
         return Note.from_dict({"content": res["content"], "private": False})
-    return res["message"]
+    return res["message"]  # сообщение об ошибке
 
 
 def create_note(note: dict, _user: User):
+    # получает словарь типа {"content": "content", "private": False/True} и User с обязательными полями пароля и имени
     _dict = note.copy()
     _dict.update({"username": _user.username, "password": _user.password})
     res = requests.post(api_host + "notes", json=_dict).json()
     if res["code"] != OK:
-        return res["message"]
+        return res["message"]  # сообщение об ошибке
     note["id"] = res["id"]
     if _user.notes is not None:
         _user.notes.append(Note.from_dict(note))
     return Note.from_dict(note)
 
 
-def edit_note(note: Note, _user: User):
+def edit_note(note: Note, _user: User):  # изменяет записку
     res = requests.put(api_host + f"notes/{note.id}",
                        json={"username": _user.username, "password": _user.password, "content": note.content,
                              "private": note.private}).json()
     return res["message"]
 
 
-def delete(_user: User, note_id):
+def delete(_user: User, note_id):  # удаляет записку
     res = requests.delete(api_host + f"notes/{note_id}", json={"username": _user.username, "password": _user.password})
 
 
-def get_name(user_id):
+def get_name(user_id):  # получает имя по айди
     res = requests.get(api_host + f"username/{user_id}").json()
     if res["code"] != OK:
-        return res["message"]
+        return res["message"]  # сообщение об ошибке
     final = dict()
     final["username"] = res["username"]
     final["password"] = "123456"
@@ -61,10 +64,10 @@ def get_name(user_id):
     return User.from_dict(res)
 
 
-def register(_user: dict):
+def register(_user: dict):  # регистрирует пользователя
     res = requests.post(api_host + f"users", json=_user).json()
     if res["code"] != OK:
-        return res["message"]
+        return res["message"]  # сообщение об ошибке
     user_dict = _user.copy()
     user_dict["id"] = res["id"]
     return User.from_dict(user_dict)

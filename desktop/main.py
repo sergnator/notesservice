@@ -11,7 +11,6 @@ from api.Notes import Note
 from api.Users import User
 from api.api_com import login, delete, edit_note, get_note_by_id, create_note
 
-from tests.test_data.data import *
 
 if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -22,7 +21,7 @@ if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
 user_global: None | User = None
 
 
-class Message(QDialog, MessageForm):
+class Message(QDialog, MessageForm):  # окно с сообщением
     def __init__(self, message):
         super().__init__()
         self.setupUi(self)
@@ -38,7 +37,7 @@ class App(QMainWindow, MainForm):
         qdarktheme.setup_theme("light")
         self.set_connection()
 
-    def set_connection(self):
+    def set_connection(self):  # устанавливает обработчики на кнопки
         self.login_button.clicked.connect(self.login_click)
         self.send_button.clicked.connect(self.send_click)
         self.search_button.clicked.connect(self.read_click)
@@ -51,11 +50,9 @@ class App(QMainWindow, MainForm):
     def login_click(self):
         name = self.name_field.text()
         password = self.password_field.text()
-        # отправка данных
-
         global user_global
-        user = login({"username": name, "password": password})
-        if isinstance(user, User):
+        user = login({"username": name, "password": password})  # обращение к api
+        if isinstance(user, User):  # пользователь существует
             user_global = user
             self.username_label.setText(user_global.username)
             self.username_label_2.setText(user_global.username)
@@ -66,18 +63,18 @@ class App(QMainWindow, MainForm):
             self.main_tabs.addTab(self.logout_tab, "")
             self.retranslateUi(self)
             dialog = Message("Login successful")
-        else:
+        else:  # не существует
             dialog = Message(user["message"])
         dialog.show()
         dialog.exec_()
         self.name_field.setText("")
         self.password_field.setText("")
 
-    def send_click(self):
+    def send_click(self):  # обработчик для создания заметки
         content = self.note_write_field.toPlainText()
         is_private = self.is_private.isChecked()
-        res = create_note({"content": content, "private": is_private}, user_global)
-        if isinstance(res, Note):
+        res = create_note({"content": content, "private": is_private}, user_global)  # обращение к api
+        if isinstance(res, Note):  # ноута создана
             dialog = Message(
                 "The note was created successfully, you can get it by ID, if private false: " + str(res.id))
             dialog.show()
@@ -88,7 +85,7 @@ class App(QMainWindow, MainForm):
             dialog.show()
             dialog.exec_()
 
-    def read_click(self, id=None):
+    def read_click(self, id=None):  # обработчик для чтения заметки
         _id = self.search_id_field.text()
         res = get_note_by_id(_id)
         if isinstance(res, Note):
@@ -100,9 +97,10 @@ class App(QMainWindow, MainForm):
 
     def change_tab(self):
         global user_global
-        if self.main_tabs.currentWidget() == self.all_notes_tab:
+        if self.main_tabs.currentWidget() == self.all_notes_tab:  # если открыта вкладка пользователя
             global user_global
-            user_global = login({"username": user_global.username, "password": user_global.password})
+            user_global = login({"username": user_global.username,
+                                 "password": user_global.password})  # таким образом получаю все записки
             self.back.setVisible(True)
             self.next.setVisible(True)
             self.delete_button.setVisible(True)
@@ -117,7 +115,7 @@ class App(QMainWindow, MainForm):
                 self.back.setVisible(False)
             if self.current_note_number >= len(user_global.notes) - 1:
                 self.next.setVisible(False)
-        elif self.main_tabs.currentWidget() == self.logout_tab:
+        elif self.main_tabs.currentWidget() == self.logout_tab:  # при выходе
             user_global = None
             self.main_tabs.removeTab(self.main_tabs.indexOf(self.all_notes_tab))
             self.main_tabs.addTab(self.login_tab, "")
@@ -128,6 +126,7 @@ class App(QMainWindow, MainForm):
             self.username_label_2.setText("")
             self.username_label_3.setText("")
 
+    # для перемещения по вкладкам
     def next_click(self):
         self.current_note_number += 1
         self.change_tab()
@@ -136,7 +135,7 @@ class App(QMainWindow, MainForm):
         self.current_note_number -= 1
         self.change_tab()
 
-    def edit_click(self):
+    def edit_click(self):  # переход на вкладку изменения ноты
         content = user_global.notes[self.current_note_number].content
         private = user_global.notes[self.current_note_number].private
         self.main_tabs.setCurrentIndex(0)
@@ -145,7 +144,7 @@ class App(QMainWindow, MainForm):
         self.send_button.clicked.disconnect()
         self.send_button.clicked.connect(self.edit_send_click)
 
-    def edit_send_click(self):
+    def edit_send_click(self):  # отправка изменённой ноты
         user_global.notes[self.current_note_number].content = self.note_write_field.toPlainText()
         user_global.notes[self.current_note_number].private = self.is_private.isChecked()
         res = edit_note(user_global.notes[self.current_note_number], user_global)
@@ -156,7 +155,7 @@ class App(QMainWindow, MainForm):
         mes.show()
         mes.exec_()
 
-    def delete(self):
+    def delete(self):  # удаление заметки
         delete(user_global, user_global.notes[self.current_note_number].id)
         del user_global.notes[self.current_note_number]
         self.current_note_number = 0

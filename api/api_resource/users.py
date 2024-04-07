@@ -34,7 +34,7 @@ class UserNoParamResource(Resource):
         session = db_session.create_session()
         user = session.query(User).filter(User.name == args["username"]).first()
         if user:
-            return jsonify({"message": "username id already used", "code": NAMETAKEN})
+            return jsonify({"message": "username id already used", "code": NAME_TAKEN})
         if args["notes"] is None:
             args["notes"] = []
         user = User(name=args["username"], password=args["password"],
@@ -49,7 +49,7 @@ class UserNoParamResource(Resource):
         db_session.global_init("db.db")
         args = parser.parse_args()
         if args["notes"] is not None:
-            return jsonify({"message": "bad request", "code": BADREQUEST})
+            return jsonify({"message": "bad request", "code": BAD_REQUEST})
         session = db_session.create_session()
         user = session.query(User).filter(User.name == args["username"], User.password == args["password"]).first()
         if user:

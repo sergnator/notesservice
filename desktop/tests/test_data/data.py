@@ -5,3 +5,4 @@ user_test = {"username": 'sergey', "password": '123', "notes": [
 
 test_result_of_write = {"result": True, "id": "1"}
 test_result_of_read = {"content": "gasgashashah", "username": "124124", "is_private": False}
+# данные для тестов

@@ -33,6 +33,6 @@ class User(Descripter):  # класс пользователя
     def from_json(js: str):  # получает строку формата js и возвращает экземпляр класса
         return User.from_json(json.loads(js))
 
-    def to_dict(self):
+    def to_dict(self):  # превращают в словарь
         return {"username": self.username, "password": self.password, "notes": [note.to_dict() for note in self.notes],
                 "id": self.id}

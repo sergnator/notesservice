@@ -22,8 +22,9 @@ def load_user(user_id):
 def login_():
     form = LoginForm()
     if form.validate_on_submit():
-        user = login({"username": form.username.data, "password": form.password.data})
-        if isinstance(user, User):
+        user = login({"username": form.username.data,
+                      "password": form.password.data})  # обращаемся к api для проверки пользователя
+        if isinstance(user, User):  # пользователь существует
             max_age = None
             if form.remember_me.data:
                 max_age = datetime.timedelta(seconds=60 * 60 * 24 * 365)
@@ -31,7 +32,7 @@ def login_():
             res = make_response(redirect(url_for('index')))
             res.set_cookie("password", form.password.data, max_age=max_age)
             return res
-        return render_template("login.html", title="Login", form=form, error=user)
+        return render_template("login.html", title="Login", form=form, error=user)  # выводит сообщение Api
     return render_template("login.html", title="Login", form=form, error="None")
 
 
@@ -39,8 +40,8 @@ def login_():
 def registration():
     form = LoginForm()
     if form.validate_on_submit():
-        user = register({"username": form.username.data, "password": form.password.data})
-        if isinstance(user, User):
+        user = register({"username": form.username.data, "password": form.password.data})  # создаём пользователя
+        if isinstance(user, User):  # создали корректно
             max_age = None
             if form.remember_me.data:
                 max_age = datetime.timedelta(seconds=60 * 60 * 24 * 365)
@@ -48,7 +49,8 @@ def registration():
             res = make_response(redirect(url_for('index')))
             res.set_cookie("password", form.password.data, max_age=max_age)
             return res
-        return render_template("registration.html", title="Register", form=form, error=user)
+        return render_template("registration.html", title="Register", form=form,
+                               error=user)  # если не корректно, то выводит сообщение
     return render_template("registration.html", title="Register", error="None", form=form)
 
 
@@ -59,9 +61,10 @@ def create():
     if form.validate_on_submit():
         note = {"content": form.content.data, "is_private": form.is_private.data}
         user = User.from_dict({"username": current_user.username, "password": request.cookies.get("password")})
-        res = create_note(note, user)
+        res = create_note(note, user)  # создаём заметку
         if not isinstance(res, Note):
-            return render_template("create.html", title="Create Note", form=form, error=res)
+            return render_template("create.html", title="Create Note", form=form,
+                                   error=res)  # выводим сообщение об ошибке
     return render_template("create.html", title="Create", form=form, error="None")
 
 

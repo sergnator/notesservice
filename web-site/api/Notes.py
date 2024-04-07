@@ -23,5 +23,5 @@ class Note(Descripter):
     def from_json(js: str):  # получает строку формата js и возвращает экземпляр класса
         return Note.from_json(json.loads(js))
 
-    def to_dict(self):
+    def to_dict(self):  # превращает в словарь
         return {"username": self.user_id, "content": self.content, "private": self.private, "id": self.id}
