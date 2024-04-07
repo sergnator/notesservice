@@ -14,3 +14,8 @@ class WriteNoteForm(FlaskForm):  # форма для создания(поиск
     is_private = BooleanField('Private')
     content = TextAreaField('Content', validators=[DataRequired()])
     submit = SubmitField('Write')
+
+
+class ReadNoteForm(FlaskForm):
+    search_field = StringField('Search', validators=[DataRequired()])
+    submit = SubmitField('Search')

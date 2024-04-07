@@ -3,7 +3,7 @@ from flask_login import LoginManager, current_user, logout_user, login_required
 from flask_login import login_user as login_user_flask
 
 from api import *
-from forms import LoginForm, WriteNoteForm
+from forms import LoginForm, WriteNoteForm, ReadNoteForm
 
 import datetime
 
@@ -59,13 +59,24 @@ def registration():
 def create():
     form = WriteNoteForm()
     if form.validate_on_submit():
-        note = {"content": form.content.data, "is_private": form.is_private.data}
+        note = {"content": form.content.data, "private": form.is_private.data}
         user = User.from_dict({"username": current_user.username, "password": request.cookies.get("password")})
         res = create_note(note, user)  # создаём заметку
         if not isinstance(res, Note):
             return render_template("create.html", title="Create Note", form=form,
                                    error=res)  # выводим сообщение об ошибке
     return render_template("create.html", title="Create", form=form, error="None")
+
+
+@app.route("/read", methods=["GET", "POST"])
+def read():
+    form = ReadNoteForm()
+    if form.validate_on_submit():
+        res = get_note_by_id(form.search_field.data)
+        if isinstance(res, Note):
+            return render_template("read.html", title="Read Note", form=form, text=res.content, error="None")
+        return render_template("read.html", title="Read Note", form=form, error=res)
+    return render_template("read.html", title="Read Note", form=form, error="None", text="")
 
 
 @app.route("/logout")

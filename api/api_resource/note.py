@@ -25,7 +25,7 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
         db_session.global_init("db.db")
         abort_if_note_not_found(note_id)
         session = db_session.create_session()
-        note = session.query(Note).filter(Note.private is False, Note.id == note_id).first()
+        note = session.query(Note).filter(Note.private == 0, Note.id == note_id).first()
         if note:
             _dict = note.to_dict()
             _dict.update({"code": OK})
@@ -72,7 +72,7 @@ class NoteListResource(Resource):  # ресурс для заметок без �
     def get(self):  # отправляет все заметки которые не приватные
         db_session.global_init("db.db")
         session = db_session.create_session()
-        notes = session.query(Note).filter(Note.private == False).all()
+        notes = session.query(Note).filter(Note.private == 0).all()
         session.close()
         return jsonify({"notes": [item.to_dict() for item in notes], "code": OK})
 

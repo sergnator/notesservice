@@ -4,4 +4,3 @@ BAD_REQUEST = "2"
 NOTFOUND = "3"
 WRONG_PASSWORD_USERNAME = "4"
 # все коды ответов
-
