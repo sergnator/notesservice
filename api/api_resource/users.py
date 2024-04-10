@@ -9,7 +9,7 @@ from .aborts import abort_if_user_not_found
 from .codes_error import *
 
 parser = reqparse.RequestParser()  # для парса аргументов
-parser.add_argument('username', required=True)
+parser.add_argument('username', required=False)
 parser.add_argument('password', required=True)
 parser.add_argument('notes', type=dict, action="append")
 parser.add_argument("email", required=True)
@@ -35,9 +35,13 @@ class UserNoParamResource(Resource):
         session = db_session.create_session()
         user = session.query(User).filter(User.email == args["email"]).first()
         if user:
+            session.close()
             return jsonify({"message": "email is already used", "code": NAME_TAKEN})
         if args["notes"] is None:
             args["notes"] = []
+        if args["username"] is not None:
+            session.close()
+            return jsonify({"message": "bad_request", "code": BAD_REQUEST})
         user = User(name=args["username"], password=args["password"],
                     notes=[Note(content=note['content'], private=note["private"]) for note in args["notes"]],
                     email=args["email"])
@@ -54,9 +58,11 @@ class UserNoParamResource(Resource):
             return jsonify({"message": "bad request", "code": BAD_REQUEST})
         session = db_session.create_session()
         user = session.query(User).filter(User.email == args["email"], User.password == args["password"]).first()
-        if user:
-            return {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id}
+        res = {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id,
+               "username": user.name}
         session.close()
+        if user:
+            return res
         return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
 
 
@@ -66,6 +72,7 @@ class UserNameResource(Resource):
         session = db_session.create_session()
         user = session.query(User).filter(User.id == user_id).first()
         if not user:
+            session.close()
             return jsonify({"message": "user not found", "code": NOTFOUND})
         username = user.name
         session.close()

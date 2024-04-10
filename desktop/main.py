@@ -48,10 +48,10 @@ class App(QMainWindow, MainForm):
         self.delete_button.clicked.connect(self.delete)
 
     def login_click(self):
-        name = self.name_field.text()
+        email = self.name_field.text()
         password = self.password_field.text()
         global user_global
-        user = login({"username": name, "password": password})  # обращение к api
+        user = login({"email": email, "password": password})  # обращение к api
         if isinstance(user, User):  # пользователь существует
             user_global = user
             self.username_label.setText(user_global.username)
@@ -99,7 +99,7 @@ class App(QMainWindow, MainForm):
         global user_global
         if self.main_tabs.currentWidget() == self.all_notes_tab:  # если открыта вкладка пользователя
             global user_global
-            user_global = login({"username": user_global.username,
+            user_global = login({"email": user_global.email,
                                  "password": user_global.password})  # таким образом получаю все записки
             self.back.setVisible(True)
             self.next.setVisible(True)
@@ -149,7 +149,7 @@ class App(QMainWindow, MainForm):
         user_global.notes[self.current_note_number].private = self.is_private.isChecked()
         res = edit_note(user_global.notes[self.current_note_number], user_global)
         self.send_button.clicked.disconnect()
-        self.send_button.clicked.connect(self.edit_click)
+        self.send_button.clicked.connect(self.send_click)
         self.main_tabs.setCurrentWidget(self.all_notes_tab)
         mes = Message(f"{res['message']}")
         mes.show()

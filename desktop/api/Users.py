@@ -9,6 +9,7 @@ class User(Descripter):  # класс пользователя
         {
         "username": "username",
         "password": "123456",
+        "email": "email@email.com"
         "notes": [
             {"name": "name of note",
             "username": "username",
@@ -20,6 +21,7 @@ class User(Descripter):  # класс пользователя
     password = None
     notes: list[Note] = None
     id = None
+    email = None
 
     @staticmethod
     def from_dict(_dict: dict):  # получает словарь и возвращает экземпляр класса
@@ -35,4 +37,4 @@ class User(Descripter):  # класс пользователя
 
     def to_dict(self):
         return {"username": self.username, "password": self.password, "notes": [note.to_dict() for note in self.notes],
-                "id": self.id}
+                "id": self.id, "email": self.email}
