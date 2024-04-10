@@ -10,4 +10,5 @@ class User(SqlAlchemyBase, SerializerMixin):
 	id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
 	name = sqlalchemy.Column(sqlalchemy.String)
 	password = sqlalchemy.Column(sqlalchemy.String)
+	email = sqlalchemy.Column(sqlalchemy.String)
 	notes = orm.relationship("Note")

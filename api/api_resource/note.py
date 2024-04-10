@@ -10,11 +10,11 @@ from api.db_session.Users import User
 from .codes_error import *
 
 parser2 = reqparse.RequestParser()  # для парса аргументов юзера
-parser2.add_argument("username", required=True)
+parser2.add_argument("email", required=True)
 parser2.add_argument("password", required=True)
 
 parser = reqparse.RequestParser()  # для парса аргументов и юзера и заметок
-parser.add_argument("username", required=True)
+parser.add_argument("email", required=True)
 parser.add_argument("password", required=True)
 parser.add_argument("content", required=True)
 parser.add_argument("private", required=True, type=bool)
@@ -39,9 +39,9 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
         abort_if_note_not_found(note_id)
         session = db_session.create_session()
         args = parser2.parse_args()
-        user = session.query(User).filter(User.name == args["username"], User.password == args["password"]).first()
+        user = session.query(User).filter(User.email == args["email"], User.password == args["password"]).first()
         if not user:
-            return jsonify({"message": "username or password - wrong", "code": WRONG_PASSWORD_USERNAME})
+            return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
         for note in user.notes:
             if note.id == note_id:
                 session.delete(note)
@@ -55,9 +55,9 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
         abort_if_note_not_found(note_id)
         session = db_session.create_session()
         args = parser.parse_args()
-        user = session.query(User).filter(User.name == args["username"], User.password == args["password"]).first()
+        user = session.query(User).filter(User.email == args["email"], User.password == args["password"]).first()
         if not user:
-            return jsonify({"message": "username or password - wrong", "code": WRONG_PASSWORD_USERNAME})
+            return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
         for note in user.notes:
             if note.id == note_id:
                 note.content = args["content"]
@@ -80,9 +80,9 @@ class NoteListResource(Resource):  # ресурс для заметок без �
         db_session.global_init("db.db")
         args = parser.parse_args()
         session = db_session.create_session()
-        user = session.query(User).filter(User.name == args["username"], User.password == args["password"]).first()
+        user = session.query(User).filter(User.email == args["email"], User.password == args["password"]).first()
         if not user:
-            return jsonify({"message": "username or password - wrong", "code": WRONG_PASSWORD_USERNAME})
+            return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
         note = Note(content=args['content'], private=args["private"], user_id=user.id)
         session.add(note)
         session.commit()

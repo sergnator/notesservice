@@ -15,9 +15,9 @@ def abort_if_note_not_found(note_id):  # если заметка не найде
         abort(404, message=f"Note {note_id} not found", code=NOTFOUND)
 
 
-def abort_if_user_not_found(username):  # если пользователь не найден
+def abort_if_user_not_found(user_email):  # если пользователь не найден
     db_session.global_init("db.db")
     session = db_session.create_session()
-    user = session.query(User).filter(User.name == username).first()
+    user = session.query(User).filter(User.email == user_email).first()
     if not user:
-        abort(404, message=f"User {username} not found", code=NOTFOUND)
+        abort(404, message=f"User {user_email} not found", code=NOTFOUND)

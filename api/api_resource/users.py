@@ -12,13 +12,14 @@ parser = reqparse.RequestParser()  # для парса аргументов
 parser.add_argument('username', required=True)
 parser.add_argument('password', required=True)
 parser.add_argument('notes', type=dict, action="append")
+parser.add_argument("email", required=True)
 
 
 class UserResource(Resource):  # ресурс для юзера с параметрами
-    def get(self, username):  # возвращает все не приватные заметки пользователя
-        abort_if_user_not_found(username)
+    def get(self, email_user):  # возвращает все не приватные заметки пользователя
+        abort_if_user_not_found(email_user)
         session = db_session.create_session()
-        user = session.query(User).filter(User.name == username).first()
+        user = session.query(User).filter(User.email == email_user).first()
         notes = []
         for note in user.notes:
             if not note.private:
@@ -32,13 +33,14 @@ class UserNoParamResource(Resource):
         db_session.global_init("db.db")
         args = parser.parse_args()
         session = db_session.create_session()
-        user = session.query(User).filter(User.name == args["username"]).first()
+        user = session.query(User).filter(User.email == args["email"]).first()
         if user:
-            return jsonify({"message": "username id already used", "code": NAME_TAKEN})
+            return jsonify({"message": "email is already used", "code": NAME_TAKEN})
         if args["notes"] is None:
             args["notes"] = []
         user = User(name=args["username"], password=args["password"],
-                    notes=[Note(content=note['content'], private=note["private"]) for note in args["notes"]])
+                    notes=[Note(content=note['content'], private=note["private"]) for note in args["notes"]],
+                    email=args["email"])
         session.add(user)
         session.commit()
         _id = user.id
@@ -51,18 +53,18 @@ class UserNoParamResource(Resource):
         if args["notes"] is not None:
             return jsonify({"message": "bad request", "code": BAD_REQUEST})
         session = db_session.create_session()
-        user = session.query(User).filter(User.name == args["username"], User.password == args["password"]).first()
+        user = session.query(User).filter(User.email == args["email"], User.password == args["password"]).first()
         if user:
             return {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id}
         session.close()
-        return jsonify({"message": "username or password - wrong", "code": WRONG_PASSWORD_USERNAME})
+        return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
 
 
 class UserNameResource(Resource):
-    def get(self, note_id): # возвращает имя пользователя
+    def get(self, user_id):  # возвращает имя пользователя
         db_session.global_init("db.db")
         session = db_session.create_session()
-        user = session.query(User).filter(User.id == note_id).first()
+        user = session.query(User).filter(User.id == user_id).first()
         if not user:
             return jsonify({"message": "user not found", "code": NOTFOUND})
         username = user.name
