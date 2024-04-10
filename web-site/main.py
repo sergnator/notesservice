@@ -13,6 +13,19 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+def __login(user, form):
+    if isinstance(user, User):  # пользователь существует
+        max_age = None
+        if form.remember_me.data:
+            max_age = datetime.timedelta(seconds=60 * 60 * 24 * 365)
+        login_user_flask(user, remember=form.remember_me.data, duration=max_age)
+        res = make_response(redirect(url_for('index')))
+        res.set_cookie("password", form.password.data, max_age=max_age)
+        return res
+    return render_template("registration.html", title="Register", form=form,
+                           error=user)  # если не корректно, то выводит сообщение Api
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return get_name(user_id)
@@ -23,16 +36,8 @@ def login_():
     form = LoginForm()
     if form.validate_on_submit():
         user = login({"username": form.username.data,
-                      "password": form.password.data})  # обращаемся к api для проверки пользователя
-        if isinstance(user, User):  # пользователь существует
-            max_age = None
-            if form.remember_me.data:
-                max_age = datetime.timedelta(seconds=60 * 60 * 24 * 365)
-            login_user_flask(user, remember=form.remember_me.data, duration=max_age)
-            res = make_response(redirect(url_for('index')))
-            res.set_cookie("password", form.password.data, max_age=max_age)
-            return res
-        return render_template("login.html", title="Login", form=form, error=user)  # выводит сообщение Api
+                      "password": form.password.data})  # обращаемся к api для проверки пользователя\
+        return __login(user, form)
     return render_template("login.html", title="Login", form=form, error="None")
 
 
@@ -41,16 +46,7 @@ def registration():
     form = LoginForm()
     if form.validate_on_submit():
         user = register({"username": form.username.data, "password": form.password.data})  # создаём пользователя
-        if isinstance(user, User):  # создали корректно
-            max_age = None
-            if form.remember_me.data:
-                max_age = datetime.timedelta(seconds=60 * 60 * 24 * 365)
-            login_user_flask(user, remember=form.remember_me.data, duration=max_age)
-            res = make_response(redirect(url_for('index')))
-            res.set_cookie("password", form.password.data, max_age=max_age)
-            return res
-        return render_template("registration.html", title="Register", form=form,
-                               error=user)  # если не корректно, то выводит сообщение
+        return __login(user, form)
     return render_template("registration.html", title="Register", error="None", form=form)
 
 
@@ -99,34 +95,34 @@ def index():
     return render_template("base.html", title="Home", current_user=current_user)
 
 
-@app.route("/delete/<int:id>")
+@app.route("/delete/<int:_id>")
 @login_required
-def delete_(id):
-    delete(User.from_dict({"username": current_user.username, "password": request.cookies.get("password")}), id)
+def delete_(_id):
+    delete(User.from_dict({"username": current_user.username, "password": request.cookies.get("password")}), _id)
     return redirect(url_for('index'))
 
 
-@app.route("/edit/<int:id>", methods=["GET", "POST"])
+@app.route("/edit/<int:_id>", methods=["GET", "POST"])
 @login_required
-def edit_(id):
+def edit_(_id):
     user = login({"username": current_user.username, "password": request.cookies.get("password")})
     form = WriteNoteForm()
     if form.validate_on_submit():
         for note in user.notes:
-            if note.id == id:
+            if note.id == _id:
                 note.content = form.content.data
                 note.private = form.is_private.data
                 edit_note(note, user)
                 return redirect("/")
     if isinstance(user, User):
         for note in user.notes:
-            if note.id == id:
+            if note.id == _id:
                 form.content.data = note.content
                 form.is_private.data = note.private
                 break
         else:
             return render_template("create.html", title="Create Note", form=form, current_user=current_user,
-                                   error=f"Note {id} not found", value="Edit")
+                                   error=f"Note {_id} not found", value="Edit")
     else:
         return render_template("create.html", title="Create Note", form=form, current_user=current_user, error=user,
                                value="Edit")
