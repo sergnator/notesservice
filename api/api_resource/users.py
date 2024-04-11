@@ -39,9 +39,6 @@ class UserNoParamResource(Resource):
             return jsonify({"message": "email is already used", "code": NAME_TAKEN})
         if args["notes"] is None:
             args["notes"] = []
-        if args["username"] is not None:
-            session.close()
-            return jsonify({"message": "bad_request", "code": BAD_REQUEST})
         user = User(name=args["username"], password=args["password"],
                     notes=[Note(content=note['content'], private=note["private"]) for note in args["notes"]],
                     email=args["email"])
@@ -58,6 +55,8 @@ class UserNoParamResource(Resource):
             return jsonify({"message": "bad request", "code": BAD_REQUEST})
         session = db_session.create_session()
         user = session.query(User).filter(User.email == args["email"], User.password == args["password"]).first()
+        if user is None:
+            return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
         res = {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id,
                "username": user.name}
         session.close()
@@ -75,5 +74,6 @@ class UserNameResource(Resource):
             session.close()
             return jsonify({"message": "user not found", "code": NOTFOUND})
         username = user.name
+        email = user.email
         session.close()
-        return jsonify({"username": username, "code": OK})
+        return jsonify({"username": username, "email": email, "code": OK})

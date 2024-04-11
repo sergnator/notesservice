@@ -3,7 +3,7 @@ from flask_login import LoginManager, current_user, logout_user, login_required
 from flask_login import login_user as login_user_flask
 
 from api import *
-from forms import LoginForm, WriteNoteForm, ReadNoteForm
+from forms import LoginForm, WriteNoteForm, ReadNoteForm, RegisterForm
 
 import datetime
 
@@ -35,7 +35,7 @@ def load_user(user_id):
 def login_():
     form = LoginForm()
     if form.validate_on_submit():
-        user = login({"username": form.username.data,
+        user = login({"email": form.email.data,
                       "password": form.password.data})  # обращаемся к api для проверки пользователя\
         return __login(user, form)
     return render_template("login.html", title="Login", form=form, error="None")
@@ -43,9 +43,10 @@ def login_():
 
 @app.route("/register", methods=["GET", "POST"])
 def registration():
-    form = LoginForm()
+    form = RegisterForm()
     if form.validate_on_submit():
-        user = register({"username": form.username.data, "password": form.password.data})  # создаём пользователя
+        user = register({"username": form.username.data, "password": form.password.data,
+                         "email": form.email.data})  # создаём пользователя
         return __login(user, form)
     return render_template("registration.html", title="Register", error="None", form=form)
 
@@ -56,7 +57,9 @@ def create():
     form = WriteNoteForm()
     if form.validate_on_submit():
         note = {"content": form.content.data, "private": form.is_private.data}
-        user = User.from_dict({"username": current_user.username, "password": request.cookies.get("password")})
+        user = User.from_dict(
+            {"username": current_user.username, "password": request.cookies.get("password"),
+             "email": current_user.email})
         res = create_note(note, user)  # создаём заметку
         if not isinstance(res, Note):
             return render_template("create.html", title="Create Note", form=form,
@@ -89,7 +92,7 @@ def logout_():
 @app.route("/index")
 def index():
     if current_user.is_authenticated:
-        user = login({"username": current_user.username, "password": request.cookies.get("password")})
+        user = login({"email": current_user.email, "password": request.cookies.get("password")})
         notes = user.notes
         return render_template("profile.html", title="Profile", current_user=current_user, notes=notes)
     return render_template("base.html", title="Home", current_user=current_user)
@@ -98,14 +101,16 @@ def index():
 @app.route("/delete/<int:_id>")
 @login_required
 def delete_(_id):
-    delete(User.from_dict({"username": current_user.username, "password": request.cookies.get("password")}), _id)
+    delete(User.from_dict(
+        {"username": current_user.username, "password": request.cookies.get("password"), "email": current_user.email}),
+           _id)
     return redirect(url_for('index'))
 
 
 @app.route("/edit/<int:_id>", methods=["GET", "POST"])
 @login_required
 def edit_(_id):
-    user = login({"username": current_user.username, "password": request.cookies.get("password")})
+    user = login({"email": current_user.email, "password": request.cookies.get("password")})
     form = WriteNoteForm()
     if form.validate_on_submit():
         for note in user.notes:

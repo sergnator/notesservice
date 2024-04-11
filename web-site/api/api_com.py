@@ -7,15 +7,16 @@ import requests
 
 
 def login(_user: dict):
-    # принимает словарь типа {"username": "username", "password": "123456", notes(не обязательный): [Notes]"}
-    # проверяет если в базе данных такой пользователь
+    # принимает словарь типа
+    # {"password": "123456", "email": "email@emal.com", notes(не обязательный): [Notes]"}
     res = requests.get(api_host + "users", json=_user).json()
     if res["code"] != OK:
-        return res['message']  # сообщение об ошибке
+        return res['message']
     user_dict = dict()
     user_dict["notes"] = res["notes"]
-    user_dict["username"] = _user["username"]
+    user_dict["username"] = res["username"]
     user_dict["password"] = _user["password"]
+    user_dict["email"] = _user["email"]
     user_dict["id"] = res["user_id"]
     return User.from_dict(user_dict)
 
@@ -31,7 +32,7 @@ def get_note_by_id(_id):
 def create_note(note: dict, _user: User):
     # получает словарь типа {"content": "content", "private": False/True} и User с обязательными полями пароля и имени
     _dict = note.copy()
-    _dict.update({"username": _user.username, "password": _user.password})
+    _dict.update({"username": _user.username, "password": _user.password, "email": _user.email})
     res = requests.post(api_host + "notes", json=_dict).json()
     if res["code"] != OK:
         return res["message"]  # сообщение об ошибке
@@ -41,15 +42,16 @@ def create_note(note: dict, _user: User):
     return Note.from_dict(note)
 
 
-def edit_note(note: Note, _user: User):  # изменяет записку
+def edit_note(note: Note, _user: User):
     res = requests.put(api_host + f"notes/{note.id}",
                        json={"username": _user.username, "password": _user.password, "content": note.content,
-                             "private": note.private}).json()
+                             "private": note.private, "email": _user.email}).json()
     return res["message"]
 
 
-def delete(_user: User, note_id):  # удаляет записку
-    res = requests.delete(api_host + f"notes/{note_id}", json={"username": _user.username, "password": _user.password})
+def delete(_user: User, note_id):
+    res = requests.delete(api_host + f"notes/{note_id}",
+                          json={"username": _user.username, "password": _user.password, "email": _user.email})
 
 
 def get_name(user_id):  # получает имя по айди

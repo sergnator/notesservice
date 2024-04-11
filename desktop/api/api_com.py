@@ -22,6 +22,7 @@ def login(_user: dict):
 
 
 def get_note_by_id(_id):
+    # получаем заметку
     res = requests.get(api_host + f"notes/{_id}").json()
     if res["code"] == OK:
         return Note.from_dict({"content": res["content"], "private": False})
