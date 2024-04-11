@@ -6,11 +6,14 @@ from api import *
 from forms import LoginForm, WriteNoteForm, ReadNoteForm, RegisterForm
 
 import datetime
+import catflask
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mega_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+app.register_blueprint(catflask.cat_blueprint)
 
 
 def __login(user, form):
