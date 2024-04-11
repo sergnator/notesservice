@@ -1,4 +1,5 @@
 import sys
+import logging
 
 import qdarktheme
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog
@@ -11,6 +12,7 @@ from api.Notes import Note
 from api.Users import User
 from api.api_com import login, delete, edit_note, get_note_by_id, create_note
 
+from requests.exceptions import ConnectionError
 
 if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -19,6 +21,8 @@ if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 user_global: None | User = None
+
+logging.basicConfig(filename='logging.log')
 
 
 class Message(QDialog, MessageForm):  # окно с сообщением
@@ -161,6 +165,19 @@ class App(QMainWindow, MainForm):
         self.current_note_number = 0
         self.change_tab()
 
+
+def excepthook(exc_type, exc_value, exc_tb):
+    if issubclass(exc_type, ConnectionError):
+        mes = Message("Connect failed")
+        mes.show()
+        mes.exec_()
+        return
+    tb = str(exc_value)
+    logging.critical(tb)
+    QtWidgets.QApplication.quit()
+
+
+sys.excepthook = excepthook
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

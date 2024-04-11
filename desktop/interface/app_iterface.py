@@ -161,7 +161,7 @@ class Ui_Form(object):
         self.main_tabs.setTabText(self.main_tabs.indexOf(self.wtite_tab), _translate("Form", "Write Note"))
         self.search_button.setText(_translate("Form", "Search"))
         self.main_tabs.setTabText(self.main_tabs.indexOf(self.read_tab), _translate("Form", "Read Note"))
-        self.label.setText(_translate("Form", "Name"))
+        self.label.setText(_translate("Form", "Email"))
         self.label_2.setText(_translate("Form", "Password"))
         self.login_button.setText(_translate("Form", "Login"))
         self.main_tabs.setTabText(self.main_tabs.indexOf(self.login_tab), _translate("Form", "Login"))
