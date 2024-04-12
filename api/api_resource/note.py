@@ -29,6 +29,7 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
         if note:
             _dict = note.to_dict()
             _dict.update({"code": OK})
+            session.close()
             return jsonify(_dict)  # заметка успешно найдена и не приватна
         session.close()
         return jsonify(
@@ -41,6 +42,7 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
         args = parser2.parse_args()
         user = session.query(User).filter(User.email == args["email"], User.password == args["password"]).first()
         if not user:
+            session.close()
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
         for note in user.notes:
             if note.id == note_id:
@@ -57,12 +59,14 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
         args = parser.parse_args()
         user = session.query(User).filter(User.email == args["email"], User.password == args["password"]).first()
         if not user:
+            session.close()
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
         for note in user.notes:
             if note.id == note_id:
                 note.content = args["content"]
                 note.private = args["private"]
                 session.commit()
+                session.close()
                 return jsonify({"message": f"note {note_id} change", "code": OK})
         session.close()
         return jsonify({"message": f"note {note_id} not found", "code": NOTFOUND})
@@ -82,6 +86,7 @@ class NoteListResource(Resource):  # ресурс для заметок без �
         session = db_session.create_session()
         user = session.query(User).filter(User.email == args["email"], User.password == args["password"]).first()
         if not user:
+            session.close()
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
         note = Note(content=args['content'], private=args["private"], user_id=user.id)
         session.add(note)

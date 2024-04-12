@@ -18,6 +18,7 @@ def login(_user: dict):
     user_dict["password"] = _user["password"]
     user_dict["email"] = _user["email"]
     user_dict["id"] = res["user_id"]
+    user_dict["auth_token"] = res["auth-token"]
     return User.from_dict(user_dict)
 
 
@@ -61,7 +62,7 @@ def get_name(user_id):  # получает имя по айди
     final = dict()
     final["username"] = res["username"]
     final["password"] = "123456"
-    final["id"] = user_id
+    final["id"] = res["id"]
     final["notes"] = []
     return User.from_dict(res)
 
@@ -72,4 +73,5 @@ def register(_user: dict):  # регистрирует пользователя
         return res["message"]  # сообщение об ошибке
     user_dict = _user.copy()
     user_dict["id"] = res["id"]
+    user_dict["auth_token"] = res['auth-token']
     return User.from_dict(user_dict)

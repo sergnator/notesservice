@@ -1,6 +1,10 @@
 from flask import jsonify
 from flask_restful import reqparse, Resource
 
+import random
+import string
+import datetime
+
 from api.db_session import db_session
 from api.db_session.Notes import Note
 from api.db_session.Users import User
@@ -13,6 +17,16 @@ parser.add_argument('username', required=False)
 parser.add_argument('password', required=True)
 parser.add_argument('notes', type=dict, action="append")
 parser.add_argument("email", required=True)
+
+cache = {}
+DEFAULT_COUNT = 20
+
+
+def generate_auth_token(count):
+    token = ''.join(random.choices(string.ascii_letters, k=count))
+    while token in [value[0] for value in cache.values()]:
+        token = ''.join(random.choices(string.ascii_letters, k=count))
+    return token
 
 
 class UserResource(Resource):  # ресурс для юзера с параметрами
@@ -37,8 +51,10 @@ class UserNoParamResource(Resource):
         if user:
             session.close()
             return jsonify({"message": "email is already used", "code": NAME_TAKEN})
+
         if args["notes"] is None:
             args["notes"] = []
+
         user = User(name=args["username"], password=args["password"],
                     notes=[Note(content=note['content'], private=note["private"]) for note in args["notes"]],
                     email=args["email"])
@@ -46,23 +62,31 @@ class UserNoParamResource(Resource):
         session.commit()
         _id = user.id
         session.close()
-        return jsonify({"id": _id, "code": OK, "message": "user created"})
+
+        token = cache[_id] = (datetime.datetime.now(), generate_auth_token(DEFAULT_COUNT))
+
+        return jsonify({"id": _id, "code": OK, "message": "user created", "auth-token": token[1]})
 
     def get(self):  # возвращает всю информацию о пользователе
         db_session.global_init("db.db")
         args = parser.parse_args()
         if args["notes"] is not None:
             return jsonify({"message": "bad request", "code": BAD_REQUEST})
+
         session = db_session.create_session()
         user = session.query(User).filter(User.email == args["email"], User.password == args["password"]).first()
         if user is None:
+            session.close()
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
+
+        now = datetime.datetime.now()
+        if (now - cache[user.id][0]).days >= 1:
+            cache[user.id] = (now, generate_auth_token(DEFAULT_COUNT))
+
         res = {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id,
-               "username": user.name}
+               "username": user.name, "auth-token": cache[user.id][1]}
         session.close()
-        if user:
-            return res
-        return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
+        return res
 
 
 class UserNameResource(Resource):
@@ -76,4 +100,4 @@ class UserNameResource(Resource):
         username = user.name
         email = user.email
         session.close()
-        return jsonify({"username": username, "email": email, "code": OK})
+        return jsonify({"username": username, "email": email, "code": OK, "id": user_id})
