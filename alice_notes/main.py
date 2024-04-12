@@ -11,8 +11,7 @@ alice = Alice(__name__)
 notes = {}
 
 def send_note(request: RequestData):
-    create_note(notes[request.session['session_id']], User.from_dict({"username": }))
-
+    pass
 @alice.on_start
 def start(request: RequestData):
     return Response("Привет, выбери одну из кнопок", buttons=buttons)

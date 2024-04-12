@@ -8,6 +8,7 @@ from api.db_session.Notes import Note
 from api.db_session.Users import User
 
 from .codes_error import *
+from .users import cache
 
 parser2 = reqparse.RequestParser()  # для парса аргументов юзера
 parser2.add_argument("email", required=True)
