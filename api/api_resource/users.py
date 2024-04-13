@@ -11,22 +11,13 @@ from api.db_session.Users import User
 
 from .aborts import abort_if_user_not_found
 from .codes_error import *
+from .token import generate_auth_token, DEFAULT_COUNT, check_token, cache
 
 parser = reqparse.RequestParser()  # для парса аргументов
 parser.add_argument('username', required=False)
 parser.add_argument('password', required=True)
 parser.add_argument('notes', type=dict, action="append")
 parser.add_argument("email", required=True)
-
-cache = {}
-DEFAULT_COUNT = 20
-
-
-def generate_auth_token(count):
-    token = ''.join(random.choices(string.ascii_letters, k=count))
-    while token in [value[0] for value in cache.values()]:
-        token = ''.join(random.choices(string.ascii_letters, k=count))
-    return token
 
 
 class UserResource(Resource):  # ресурс для юзера с параметрами
@@ -79,9 +70,9 @@ class UserNoParamResource(Resource):
             session.close()
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
 
-        now = datetime.datetime.now()
-        if (now - cache[user.id][0]).days >= 1:
-            cache[user.id] = (now, generate_auth_token(DEFAULT_COUNT))
+        if not check_token(cache.get(user.id, "")):
+            session.close()
+            return jsonify({"message": "token expired", "code": TOKEN_EXPIRED})
 
         res = {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id,
                "username": user.name, "auth-token": cache[user.id][1]}

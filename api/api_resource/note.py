@@ -7,8 +7,11 @@ from api.db_session import db_session
 from api.db_session.Notes import Note
 from api.db_session.Users import User
 
+import datetime
+
 from .codes_error import *
-from .users import cache
+from .token import generate_auth_token, cache, DEFAULT_COUNT, check_token
+from .functions.notes_functions import create_note
 
 parser2 = reqparse.RequestParser()  # для парса аргументов юзера
 parser2.add_argument("email", required=True)
@@ -19,6 +22,11 @@ parser.add_argument("email", required=True)
 parser.add_argument("password", required=True)
 parser.add_argument("content", required=True)
 parser.add_argument("private", required=True, type=bool)
+
+parser_auth_token = reqparse.RequestParser()
+parser_auth_token.add_argument("auth-token", required=True)
+parser_auth_token.add_argument("content", required=False)
+parser.add_argument("private", required=False, type=bool)
 
 
 class NoteResource(Resource):  # ресурс для заметки с параметрами
@@ -90,8 +98,25 @@ class NoteListResource(Resource):  # ресурс для заметок без �
             session.close()
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
         note = Note(content=args['content'], private=args["private"], user_id=user.id)
-        session.add(note)
-        session.commit()
-        _id = note.id
-        session.close()
+        _id = create_note(note)
+        return jsonify({"id": _id, "code": OK})
+
+
+class AuthTokenNote(Resource):
+    def post(self, id):
+        db_session.global_init("db.db")
+        session = db_session.create_session()
+
+        args = parser.parse_args()
+        if args["private"] or args["content"]:
+            return jsonify({"message": "bad request", "code": BAD_REQUEST})
+
+        id_ = check_token(args["auth-token"])
+        if not id_:
+            session.close()
+            return jsonify({"message": "token expired", "code": TOKEN_EXPIRED})
+
+        user = session.query(User).filter(id_ == User.id).first()
+        note = Note(content=args['content'], private=args['private'], user_id=user.id)
+        _id = create_note(note)
         return jsonify({"id": _id, "code": OK})
