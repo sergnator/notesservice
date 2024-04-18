@@ -11,7 +11,7 @@ import datetime
 
 from .codes_error import *
 from .token import generate_auth_token, cache, DEFAULT_COUNT, check_token
-from .functions.notes_functions import create_note
+from .functions.notes_functions import create_note, change_note
 
 parser2 = reqparse.RequestParser()  # для парса аргументов юзера
 parser2.add_argument("email", required=True)
@@ -70,13 +70,10 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
         if not user:
             session.close()
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
-        for note in user.notes:
-            if note.id == note_id:
-                note.content = args["content"]
-                note.private = args["private"]
-                session.commit()
-                session.close()
-                return jsonify({"message": f"note {note_id} change", "code": OK})
+        flag = False
+        _id = change_note(content=args["content"], private=args["private"], user_notes=user.notes, note_id=note_id)
+        if flag:
+            return jsonify({"message": f"note {_id} change", "code": OK})
         session.close()
         return jsonify({"message": f"note {note_id} not found", "code": NOTFOUND})
 
@@ -120,3 +117,61 @@ class AuthTokenNote(Resource):
         note = Note(content=args['content'], private=args['private'], user_id=user.id)
         _id = create_note(note)
         return jsonify({"id": _id, "code": OK})
+
+    def get(self):
+        db_session.global_init("db.db")
+        session = db_session.create_session()
+        notes = session.query(Note).filter(Note.private == 0).all()
+        session.close()
+        return jsonify({"notes": [item.to_dict() for item in notes], "code": OK})
+
+
+class NoteResourceToken(Resource):  # ресурс для заметки с параметрами
+    def get(self, note_id):  # отправляет заметку если она не приватная по айди
+        db_session.global_init("db.db")
+        abort_if_note_not_found(note_id)
+        session = db_session.create_session()
+        note = session.query(Note).filter(Note.private == 0, Note.id == note_id).first()
+        if note:
+            _dict = note.to_dict()
+            _dict.update({"code": OK})
+            session.close()
+            return jsonify(_dict)  # заметка успешно найдена и не приватна
+        session.close()
+        return jsonify(
+            {"message": f"note {note_id} not found", "code": NOTFOUND})  # заметка или не найдена - или приватна
+
+    def delete(self, note_id):  # удаляет заметку
+        db_session.global_init("db.db")
+        abort_if_note_not_found(note_id)
+        session = db_session.create_session()
+        args = parser2.parse_args()
+        id_ = check_token(args["auth-token"])
+        if not id_:
+            session.close()
+            return jsonify({"message": "token expired", "code": TOKEN_EXPIRED})
+        user = session.query(User).filter(id_ == User.id).first()
+        for note in user.notes:
+            if note.id == note_id:
+                session.delete(note)
+                session.commit()
+                return jsonify({"message": f"note {note_id} deleted", "code": OK})
+        session.close()
+        return jsonify({"message": "note not found", "code": NOTFOUND})
+
+    def put(self, note_id):  # изменяет заметку
+        db_session.global_init("db.db")
+        abort_if_note_not_found(note_id)
+        session = db_session.create_session()
+        args = parser.parse_args()
+        id_ = check_token(args["auth-token"])
+        if not id_:
+            session.close()
+            return jsonify({"message": "token expired", "code": TOKEN_EXPIRED})
+        user = session.query(User).filter(id_ == User.id).first()
+        flag = False
+        _id = change_note(content=args["content"], private=args["private"], user_notes=user.notes, note_id=note_id)
+        if flag:
+            return jsonify({"message": f"note {_id} change", "code": OK})
+        session.close()
+        return jsonify({"message": f"note {note_id} not found", "code": NOTFOUND})

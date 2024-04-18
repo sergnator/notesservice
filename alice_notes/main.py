@@ -17,4 +17,8 @@ def start(request: RequestData):
     return Response("Привет, выбери одну из кнопок", buttons=buttons)
 
 
-@alice.message('написать')
+@alice.on_message
+def res(request: RequestData):
+    return Response()
+
+

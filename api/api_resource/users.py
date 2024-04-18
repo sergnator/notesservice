@@ -70,10 +70,6 @@ class UserNoParamResource(Resource):
             session.close()
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
 
-        if not check_token(cache.get(user.id, "")):
-            session.close()
-            return jsonify({"message": "token expired", "code": TOKEN_EXPIRED})
-
         res = {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id,
                "username": user.name, "auth-token": cache[user.id][1]}
         session.close()
