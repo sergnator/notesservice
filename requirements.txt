@@ -1,5 +1,6 @@
-flask~=3.0.2
-SQLAlchemy~=2.0.29
+Flask~=3.0.2
 requests~=2.31.0
+SQLAlchemy~=2.0.29
 PyQt5~=5.15.10
 WTForms~=3.1.2
+flask-login~=

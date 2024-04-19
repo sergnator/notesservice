@@ -94,8 +94,8 @@ class NoteListResource(Resource):  # ресурс для заметок без �
         if not user:
             session.close()
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
-        note = Note(content=args['content'], private=args["private"], user_id=user.id)
-        _id = create_note(note)
+        _id = create_note(args["content"], args["private"], user.id)
+        session.close()
         return jsonify({"id": _id, "code": OK})
 
 

@@ -1,3 +1,5 @@
+import sys
+
 from requests import get, post, put, delete
 
 # database empty
@@ -24,6 +26,7 @@ print(8, get('http://127.0.0.1:5000/api/v2/users',
 print(9, post('http://127.0.0.1:5000/api/v2/notes',
            json={'content': "something", "private": False, "username": "test23",
                  "password": "123456", "email": "email23@email.com"}).json())  # create note
+sys.exit()
 print(10, get("http://127.0.0.1:5000/api/v2/users/email23@email.com").json())  # all user's notes not private
 
 print(11, get("http://127.0.0.1:5000/api/v2/notes/1").json())  # old note
@@ -39,11 +42,13 @@ for note in res["notes"]:
         break
 
 print(14, delete("http://127.0.0.1:5000/api/v2/notes/1",
-             json={"username": "test1", "password": "123456", "email": "emai@email.com"}).json())  # wrong data user
+             json={"username": "test1", "password": "123456", "email": "email23@email.com"}).json())  # wrong data user
 
 print(15, delete("http://127.0.0.1:5000/api/v2/notes/1",
              json={"username": "test23", "password": "123456", "email": "email23@email.com"}).json())
 print(16, get("http://127.0.0.1:5000/api/v2/notes/1").json())  # not found because note 1 deleted
 print(17, get('http://127.0.0.1:5000/api/v2/users',
           json={"username": "test23", "password": "123456",
-                "email": "email23 @email.com"}).json())  # all user's notes but note 1 deleted
+                "email": "email23@email.com"}).json())  # all user's notes but note 1 deleted
+
+print(18, get('http://127.0.0.1:5000/api/v2/'))

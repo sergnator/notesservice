@@ -1,12 +1,14 @@
 from api.db_session import db_session
+from api.db_session.Notes import Note
 
 
-def create_note(note):
+def create_note(content, private, id_user):
     db_session.global_init("db.db")
     session = db_session.create_session()
+    note = Note(content=content, private=private, user_id=id_user)
     session.add(note)
-    _id = note.id
     session.commit()
+    _id = note.id
     session.close()
     return _id
 
