@@ -2,9 +2,12 @@ import flask
 from flask_restful import Api
 from api_resource import note
 from api_resource import users
+from api.db_session import db_session
 
 app = flask.Flask(__name__)
 api = Api(app)
+
+db_session.global_init("db.db")
 
 api.add_resource(note.NoteResource, "/api/v2/notes/<int:note_id>")
 api.add_resource(note.NoteListResource, "/api/v2/notes")
