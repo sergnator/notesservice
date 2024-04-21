@@ -38,7 +38,7 @@ res = get('http://127.0.0.1:5000/api/v2/users',
           json={"username": "test23", "password": "123456", "email": "email23@email.com"}).json()
 for note in res["notes"]:
     if note["id"] == 1:
-        print(note)  # edited note
+        print(note)  # edited note1
         break
 
 print(14, delete("http://127.0.0.1:5000/api/v2/notes/1",
@@ -52,3 +52,6 @@ print(17, get('http://127.0.0.1:5000/api/v2/users',
                 "email": "email23@email.com"}).json())  # all user's notes but note 1 deleted
 
 print(18, get('http://127.0.0.1:5000/api/v2/'))
+
+print(19, post('http://127.0.0.1:5000/api/v2/notes',
+           json={'content': "something", "private": False, "auth-token": "nwPgKPKtnxXvmqhfNAcp"}).json())  # create note
