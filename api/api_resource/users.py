@@ -11,7 +11,7 @@ from api.db_session.Users import User
 
 from .aborts import abort_if_user_not_found
 from .codes_error import *
-from .token import generate_auth_token, DEFAULT_COUNT, check_token, cache
+from .token import generate_auth_token, DEFAULT_COUNT, get_token, cache
 
 parser = reqparse.RequestParser()  # для парса аргументов
 parser.add_argument('username', required=False)
@@ -71,7 +71,7 @@ class UserNoParamResource(Resource):
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
 
         res = {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id,
-               "username": user.name, "auth-token": cache[user.id][1]}
+               "username": user.name, "auth-token": get_token(user.id)}
         session.close()
         return res
 

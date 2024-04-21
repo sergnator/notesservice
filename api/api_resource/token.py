@@ -22,5 +22,12 @@ def generate_auth_token(count):
     return token
 
 
+def get_token(_id):
+    if not check_token(cache.get(_id)):
+        cache[_id] = (datetime.datetime.now(), generate_auth_token(DEFAULT_COUNT))
+        return cache[_id][1]
+    return cache[_id][1]
+
+
 cache = {}
 DEFAULT_COUNT = 20

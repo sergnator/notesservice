@@ -88,7 +88,7 @@ class NoteListResource(Resource):  # ресурс для заметок без �
 
 
 class AuthTokenNote(Resource):
-    def post(self, id):
+    def post(self, id):  # TODO: тут есть параметр
         session = db_session.create_session()
 
         args = parser.parse_args()
@@ -105,14 +105,14 @@ class AuthTokenNote(Resource):
         _id = create_note(note)
         return jsonify({"id": _id, "code": OK})
 
-    def get(self):
+    def get(self):  # TODO: тут нет
         session = db_session.create_session()
         notes = session.query(Note).filter(Note.private == 0).all()
         session.close()
         return jsonify({"notes": [item.to_dict() for item in notes], "code": OK})
 
 
-class NoteResourceToken(Resource):  # ресурс для заметки с параметрами
+class NoteResourceToken(Resource):  # TODO: нет функции создания
     def get(self, note_id):  # отправляет заметку если она не приватная по айди
         abort_if_note_not_found(note_id)
         session = db_session.create_session()

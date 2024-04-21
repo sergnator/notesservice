@@ -4,7 +4,6 @@ from api.api_resource.codes_error import *
 from flask import jsonify
 
 
-
 def create_note(content, private, id_user, session):
     note = Note(content=content, private=private, user_id=id_user)
     session.add(note)
@@ -25,5 +24,3 @@ def change_note(content, private, user_notes, note_id, session):
             return jsonify({"message": f"note {_id} change", "code": OK})
     session.close()
     return jsonify({"message": f"note {note_id} not found", "code": NOTFOUND})
-
-
