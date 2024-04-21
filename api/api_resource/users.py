@@ -71,7 +71,7 @@ class UserNoParamResource(Resource):
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
 
         res = {"notes": [note.to_dict() for note in user.notes], "code": OK, "user_id": user.id,
-               "username": user.name, "auth-token": get_token(user.id)}
+               "username": user.name, "auth-token": get_token(user.id), "email": user.email}
         session.close()
         return res
 

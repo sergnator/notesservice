@@ -24,3 +24,14 @@ def change_note(content, private, user_notes, note_id, session):
             return jsonify({"message": f"note {_id} change", "code": OK})
     session.close()
     return jsonify({"message": f"note {note_id} not found", "code": NOTFOUND})
+
+
+def delete_note(note_id, user, session):
+    for note in user.notes:
+        if note.id == note_id:
+            session.delete(note)
+            session.commit()
+            session.close()
+            return jsonify({"message": f"note {note_id} deleted", "code": OK})
+    session.close()
+    return jsonify({"message": f"note {note_id} not found", "code": NOTFOUND})
