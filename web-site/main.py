@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, make_response
+from flask import Flask, render_template, redirect, url_for, make_response, request
 from flask_login import LoginManager, current_user, logout_user, login_required
 from flask_login import login_user as login_user_flask
 
@@ -15,9 +15,6 @@ login_manager.init_app(app)
 
 app.register_blueprint(catflask.cat_blueprint)
 
-cache_password = {}
-cache_auth = {}
-
 
 def __login(user, form):
     if isinstance(user, User):  # пользователь существует
@@ -25,11 +22,10 @@ def __login(user, form):
         if form.remember_me.data:
             max_age = datetime.timedelta(seconds=60 * 60 * 24 * 365)
         login_user_flask(user, remember=form.remember_me.data, duration=max_age)
-        cache_password[str(user.id)] = user.password
-        cache_auth[str(user.id)] = user.auth_token
-        return redirect(url_for('index'))
-    return render_template("registration.html", title="Register", form=form,
-                           error=user)  # если не корректно, то выводит сообщение Api
+        res = make_response(redirect(url_for('index')))
+        res.set_cookie("password", user.password, max_age=max_age)
+        res.set_cookie("auth_token", user.auth_token, max_age=max_age)
+        return res
 
 
 @login_manager.user_loader
@@ -43,10 +39,14 @@ def login_():
     if form.validate_on_submit():
         user = login({"email": form.email.data,
                       "password": form.password.data})  # обращаемся к api для проверки пользователя\
-        return __login(user, form)
+        res = __login(user, form)
+        if res is not None:
+            return res
+        return render_template("login.html", title="Register", error=user, form=form, token="")
     token = ""
     if current_user.is_authenticated:
-        token = cache_auth.get(current_user.id, "")
+        token = request.cookies.get(current_user.id, "")
+
     return render_template("login.html", title="Login", form=form, error="None", token=token)
 
 
@@ -56,10 +56,13 @@ def registration():
     if form.validate_on_submit():
         user = register({"username": form.username.data, "password": form.password.data,
                          "email": form.email.data})  # создаём пользователя
-        return __login(user, form)
+        res = __login(user, form)
+        if res is not None:
+            return None
+        return render_template("registration.html", title="Register", error=user, form=form, token="")
     token = ""
     if current_user.is_authenticated:
-        token = cache_auth.get(current_user.id, "")
+        token = request.cookies.get(current_user.id, "")
     return render_template("registration.html", title="Register", error="None", form=form, token=token)
 
 
@@ -68,12 +71,12 @@ def registration():
 def create():
     token = ""
     if current_user.is_authenticated:
-        token = cache_auth.get(current_user.id, "")
+        token = request.cookies.get(current_user.id, "")
     form = WriteNoteForm()
     if form.validate_on_submit():
         note = {"content": form.content.data, "private": form.is_private.data}
         user = User.from_dict(
-            {"username": current_user.username, "password": cache_password[str(current_user.id)],
+            {"username": current_user.username, "password": request.cookies[str(current_user.id)],
              "email": current_user.email})
         res = create_note(note, user)  # создаём заметку
         if not isinstance(res, Note):
@@ -88,7 +91,7 @@ def read():
     form = ReadNoteForm()
     token = ""
     if current_user.is_authenticated:
-        token = cache_auth.get(current_user.id, "")
+        token = request.cookies.get(current_user.id, "")
     if form.validate_on_submit():
         res = get_note_by_id(form.search_field.data)
         if isinstance(res, Note):
@@ -114,8 +117,8 @@ def index():
     if isinstance(current_user, str):
         return render_template("base.html", title="Home", current_user=current_user, token="")
     if current_user.is_authenticated:
-        token = cache_auth.get(str(current_user.id), "")
-        user = login({"email": current_user.email, "password": cache_password.get(str(current_user.id))})
+        token = request.cookies.get("auth_token", "")
+        user = login({"email": current_user.email, "password": request.cookies.get("password")})
         notes = user.notes
         return render_template("profile.html", title="Profile", current_user=current_user, notes=notes, token=token)
     return render_template("base.html", title="Home", current_user=current_user, token="")
@@ -125,7 +128,7 @@ def index():
 @login_required
 def delete_(_id):
     delete(User.from_dict(
-        {"username": current_user.username, "password": cache_password[str(current_user.id)],
+        {"username": current_user.username, "password": request.cookies.get("password"),
          "email": current_user.email}),
         _id)
     return redirect(url_for('index'))
@@ -136,8 +139,8 @@ def delete_(_id):
 def edit_(_id):
     token = ""
     if current_user.is_authenticated:
-        token = cache_auth.get(current_user.id, "")
-    user = login({"email": current_user.email, "password": current_user.id})
+        token = request.cookies.get(current_user.id, "")
+    user = login({"email": current_user.email, "password": request.cookies.get("password")})
     form = WriteNoteForm()
     if form.validate_on_submit():
         for note in user.notes:

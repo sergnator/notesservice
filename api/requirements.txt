@@ -1,0 +1,5 @@
+flask==3.0.3
+flask-restful==0.3.10
+requests==2.31.0
+sqlalchemy==2.0.29
+sqlalchemy-serializer==1.4.12
