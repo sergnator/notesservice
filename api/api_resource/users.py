@@ -77,7 +77,7 @@ class UserNoParamResource(Resource):
 
 
 class UserNameResource(Resource):
-    def get(self, user_id):  # возвращает имя пользователя
+    def get(self, user_id):  # возвращает email пользователя
         db_session.global_init("db.db")
         session = db_session.create_session()
         user = session.query(User).filter(User.id == user_id).first()

@@ -1,5 +1,6 @@
 import sys
 import logging
+import traceback
 
 import qdarktheme
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog
@@ -75,6 +76,11 @@ class App(QMainWindow, MainForm):
         self.password_field.setText("")
 
     def send_click(self):  # обработчик для создания заметки
+        if user_global is None:
+            dialog = Message("You need to login first")
+            dialog.show()
+            dialog.exec_()
+            return
         content = self.note_write_field.toPlainText()
         is_private = self.is_private.isChecked()
         res = create_note({"content": content, "private": is_private}, user_global)  # обращение к api
@@ -95,7 +101,7 @@ class App(QMainWindow, MainForm):
         if isinstance(res, Note):
             self.note_read_field.setText(res.content)
             return
-        mes = Message(res["message"])
+        mes = Message(res)
         mes.show()
         mes.exec_()
 
@@ -149,6 +155,11 @@ class App(QMainWindow, MainForm):
         self.send_button.clicked.connect(self.edit_send_click)
 
     def edit_send_click(self):  # отправка изменённой ноты
+        if user_global is None:
+            dialog = Message("You need to login first")
+            dialog.show()
+            dialog.exec_()
+            return
         user_global.notes[self.current_note_number].content = self.note_write_field.toPlainText()
         user_global.notes[self.current_note_number].private = self.is_private.isChecked()
         res = edit_note(user_global.notes[self.current_note_number], user_global)
@@ -172,7 +183,7 @@ def excepthook(exc_type, exc_value, exc_tb):
         mes.show()
         mes.exec_()
         return
-    tb = str(exc_value)
+    tb = str(exc_value) + "\n".join([str(el) for el in traceback.extract_stack()])
     logging.critical(tb)
     QtWidgets.QApplication.quit()
 
