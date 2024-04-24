@@ -50,7 +50,7 @@ class NoteResource(Resource):  # ресурс для заметки с пара�
         if not user:
             session.close()
             return jsonify({"message": "email or password - wrong", "code": WRONG_PASSWORD_EMAIL})
-        return delete_note(args["id"], user, session)
+        return delete_note(note_id, user, session)
 
     def put(self, note_id):  # изменяет заметку
         abort_if_note_not_found(note_id)
@@ -83,12 +83,30 @@ class NoteListResource(Resource):  # ресурс для заметок без �
 
 
 class NoteResourceToken(Resource):
+    def get(self):
+        args = parser_auth_token.parse_args()
+        session = db_session.create_session()
+        if args["private"] is not None or args["content"] is not None or args["id"]:
+            session.close()
+            return jsonify({"message": "bad request", "code": BAD_REQUEST})
+        key = check_token(args["auth-token"])
+        if not key:
+            session.close()
+            return jsonify({"message": "token expired", "code": TOKEN_EXPIRED})
+
+        user = session.query(User).filter(User.id == key).first()
+        res = jsonify({"notes": [note.to_dict(only=('content', "private", "id")) for note in user.notes], "code": OK})
+        session.close()
+        return res
+
     def post(self):  # создаёт заметку
         args = parser_auth_token.parse_args()
         session = db_session.create_session()
         if not check_token(args["auth-token"]):
+            session.close()
             return jsonify({"message": "token expired", "code": TOKEN_EXPIRED})
         if args["content"] is None or args["private"] is None:
+            session.close()
             return jsonify({"message": "bad request", 'code': BAD_REQUEST})
         user = session.query(User).filter(User.id == check_token(args["auth-token"])).first()
         _id = create_note(args["content"], args["private"], user.id, session)
@@ -111,10 +129,10 @@ class NoteResourceToken(Resource):
         session = db_session.create_session()
         if not check_token(args["auth-token"]):
             return jsonify({"message": "token expired", "code": TOKEN_EXPIRED})
-        if args["content"] is None or args["private"] is None:
+        if args["content"] is None or args["private"] is None or args["id"] is None:
             return jsonify({"message": "bad request", "code": BAD_REQUEST})
         user = session.query(User).filter(User.id == check_token(args["auth-token"])).first()
-        message = change_note(content=args["content"], private=args["private"], user_notes=user.notes, note_id=args['id'],
+        message = change_note(content=args["content"], private=args["private"], user_notes=user.notes,
+                              note_id=args['id'],
                               session=session)
         return message
-

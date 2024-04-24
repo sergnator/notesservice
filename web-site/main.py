@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for, make_response, requ
 from flask_login import LoginManager, current_user, logout_user, login_required
 from flask_login import login_user as login_user_flask
 
-from alice_notes.api import *
+from api import *
 from forms import LoginForm, WriteNoteForm, ReadNoteForm, RegisterForm
 
 import datetime
@@ -58,7 +58,7 @@ def registration():
                          "email": form.email.data})  # создаём пользователя
         res = __login(user, form)
         if res is not None:
-            return None
+            return res
         return render_template("registration.html", title="Register", error=user, form=form, token="")
     token = ""
     if current_user.is_authenticated:
@@ -76,7 +76,7 @@ def create():
     if form.validate_on_submit():
         note = {"content": form.content.data, "private": form.is_private.data}
         user = User.from_dict(
-            {"username": current_user.username, "password": request.cookies[str(current_user.id)],
+            {"username": current_user.username, "password": request.cookies.get("password"),
              "email": current_user.email})
         res = create_note(note, user)  # создаём заметку
         if not isinstance(res, Note):
