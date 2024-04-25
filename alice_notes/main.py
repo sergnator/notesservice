@@ -1,6 +1,5 @@
 from alice_yandex import *
 from api import *
-import ngrok
 
 buttons = ButtonList()
 buttons.add_button("написать", hide=True)
