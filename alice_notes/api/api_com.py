@@ -24,6 +24,13 @@ def create_note(note: dict, _token: str):
     return Note.from_dict(note)
 
 
+def read_note_by_id(_id):
+    res = requests.get(api_host + f"notes/{_id}").json()
+    if res["code"] != OK:
+        return res["message"]
+    return Note.from_dict(res)
+
+
 def get_notes(_token: str):
     res = requests.get(api_host + "token", json={"auth-token": _token}).json()
     if res["code"] != OK:

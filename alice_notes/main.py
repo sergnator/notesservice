@@ -11,6 +11,7 @@ alice = Alice(__name__)
 
 tokens = {}
 notes = {}
+notes_for_write = {}
 
 
 @alice.on_start
@@ -52,6 +53,59 @@ def notes_(request: RequestData):
     alice.register_next_step(iter_notes, request.session["session_id"])
     return Response(f"Id: {res[current_note].id}\n{res[current_note].content}\nприватность:{res[current_note].private}",
                     buttons=buttons_for_note)
+
+
+@alice.message("прочитать")
+def read(request: RequestData):
+    alice.register_next_step(get_id, request.session["session_id"])
+    return Response("Введите id заметки")
+
+
+@alice.message("написать")
+def write(request: RequestData):
+    alice.register_next_step(get_content, request.session["session_id"])
+    return Response("Введите текст, который должен быть в заметке")
+
+
+def get_content(request: RequestData):
+    if request.request.original_utterance == " ":
+        return Response("Заметка должна содержать хотя бы один символ")
+    buttons_for_note = ButtonList()
+    buttons_for_note.add_button("да", hide=True)
+    buttons_for_note.add_button("нет", hide=True)
+    notes_for_write[request.session["session_id"]] = request.request.original_utterance
+    alice.register_next_step(get_private, request.session["session_id"])
+    return Response("Сделать её приватной?", buttons=buttons_for_note)
+
+
+def get_private(request: RequestData):
+    if request.request.original_utterance == "да":
+        res = create_note({"content": notes_for_write[request.session["session_id"]], "private": True},
+                          tokens[request.session["session_id"]])
+        if isinstance(res, str):
+            return Response(f"Сервер ответил с ошибкой: {res}", buttons=buttons)
+        return Response(f"Заметка создана успешно.", buttons=buttons)
+    elif request.request.original_utterance == "нет":
+        res = create_note({"content": notes_for_write[request.session["session_id"]], "private": False},
+                          tokens[request.session["session_id"]])
+        if isinstance(res, str):
+            return Response(f"Сервер ответил с ошибкой: {res}", buttons=buttons)
+        return Response(f"Заметка создана успешно. Id: {res.id}", buttons=buttons)
+    buttons_for_get_private = ButtonList()
+    buttons_for_get_private.add_button("да")
+    buttons_for_get_private.add_button("нет")
+    alice.register_next_step(get_private, request)
+    return Response("Немного не поняла вас. Сделать её приватной?", buttons=buttons_for_get_private)
+
+
+def get_id(request: RequestData):
+    if not request.request.original_utterance.isdigit():
+        return Response("id всегда число", buttons=buttons)
+    res = read_note_by_id(request.request.original_utterance)
+    if isinstance(res, str):
+        return Response(f"Сервер ответил с ошибкой {res}", buttons=buttons)
+    return Response(f"Id: {res.id}\n{res.content}\nприватность:{res.private}",
+                    buttons=buttons)
 
 
 def iter_notes(request: RequestData):
