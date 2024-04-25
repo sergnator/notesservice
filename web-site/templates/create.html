@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+    <form action="" method="post" novalidate style="width: 50%; margin: auto;">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.is_private() }}
+            {{ form.is_private.label }}
+        </p>
+        <p>
+            {{ form.content(class="form-control", rows=10) }}
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary", value=value) }}</p>
+        {% if error != "None" %}
+            <div class="alert alert-danger" role="alert"> error</div>
+        {% endif %}
+    </form>
+{% endblock %}
