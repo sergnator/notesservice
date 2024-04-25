@@ -33,7 +33,7 @@ class UserResource(Resource):  # ресурс для юзера с параме�
         return jsonify({"notes": [note.to_dict() for note in notes], "code": OK})
 
 
-class UserNoParamResource(Resource):
+class UserNoParamResource(Resource):  # ресурс для юзера без параметрами
     def post(self):  # создаёт пользователя
         db_session.global_init("db.db")
         args = parser.parse_args()

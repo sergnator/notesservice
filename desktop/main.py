@@ -34,7 +34,7 @@ class Message(QDialog, MessageForm):  # окно с сообщением
         self.OK_button.clicked.connect(self.deleteLater)
 
 
-class App(QMainWindow, MainForm):
+class App(QMainWindow, MainForm):  # главное окно
     def __init__(self):
         super().__init__()
         self.setupUi(self)

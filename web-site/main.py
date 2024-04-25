@@ -34,11 +34,11 @@ def load_user(user_id):
 
 
 @app.route("/login", methods=["GET", "POST"])
-def login_():
+def login_():  # авторизация
     form = LoginForm()
     if form.validate_on_submit():
         user = login({"email": form.email.data,
-                      "password": form.password.data})  # обращаемся к api для проверки пользователя\
+                      "password": form.password.data})  # обращаемся к api для проверки пользователя
         res = __login(user, form)
         if res is not None:
             return res
@@ -51,7 +51,7 @@ def login_():
 
 
 @app.route("/register", methods=["GET", "POST"])
-def registration():
+def registration():  # регистрация
     form = RegisterForm()
     if form.validate_on_submit():
         user = register({"username": form.username.data, "password": form.password.data,
@@ -68,7 +68,7 @@ def registration():
 
 @app.route("/create", methods=["GET", "POST"])
 @login_required
-def create():
+def create():  # создание
     token = ""
     if current_user.is_authenticated:
         token = request.cookies.get(current_user.id, "")
@@ -87,7 +87,7 @@ def create():
 
 
 @app.route("/read", methods=["GET", "POST"])
-def read():
+def read():  # чтение
     form = ReadNoteForm()
     token = ""
     if current_user.is_authenticated:
@@ -112,7 +112,8 @@ def logout_():
 
 @app.route("/")
 @app.route("/index")
-def index():
+@login_required
+def index():  # главная страничка
     token = ""
     if isinstance(current_user, str):
         return render_template("base.html", title="Home", current_user=current_user, token="")
@@ -125,7 +126,7 @@ def index():
 
 
 @app.route("/delete/<int:_id>")
-@login_required
+@login_required  # страничка удаления заметки
 def delete_(_id):
     delete(User.from_dict(
         {"username": current_user.username, "password": request.cookies.get("password"),
@@ -136,7 +137,7 @@ def delete_(_id):
 
 @app.route("/edit/<int:_id>", methods=["GET", "POST"])
 @login_required
-def edit_(_id):
+def edit_(_id):  # страничка изменение заметки
     token = ""
     if current_user.is_authenticated:
         token = request.cookies.get(current_user.id, "")
@@ -165,7 +166,7 @@ def edit_(_id):
                            value="Edit", token=token)
 
 
-@app.after_request
+@app.after_request  # для того чтобы перемещать пользователя на страницу авторизации
 def redirect_to_sign(response):
     if response.status_code == 401:
         return redirect(url_for('login_'))

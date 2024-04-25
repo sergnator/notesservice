@@ -15,12 +15,12 @@ notes_for_write = {}
 
 
 @alice.on_start
-def on_start(request: RequestData):
+def on_start(request: RequestData):  # если сессия новая
     alice.register_next_step(register_token, request.session["session_id"])
     return Response("Привет, введите свой токен")
 
 
-def register_token(request: RequestData):
+def register_token(request: RequestData):  # получение токена
     token = request.request.original_utterance
     res = get_notes(token)
     if not isinstance(res, list):
@@ -31,11 +31,11 @@ def register_token(request: RequestData):
 
 @alice.on_message
 def on_message(request: RequestData):
-    return Response(f"{request.request.original_utterance}")
+    return Response(f"не поняла вас")
 
 
 @alice.message("заметки")
-def notes_(request: RequestData):
+def notes_(request: RequestData):  # получение профиля пользователя
     if request.session["session_id"] not in tokens.keys():
         return Response("Вам нужен токен", end_session=True)
     token = tokens.get(request.session["session_id"])
@@ -56,18 +56,18 @@ def notes_(request: RequestData):
 
 
 @alice.message("прочитать")
-def read(request: RequestData):
+def read(request: RequestData):  # прочитать заметку
     alice.register_next_step(get_id, request.session["session_id"])
     return Response("Введите id заметки")
 
 
 @alice.message("написать")
-def write(request: RequestData):
+def write(request: RequestData):  # написать заметку
     alice.register_next_step(get_content, request.session["session_id"])
     return Response("Введите текст, который должен быть в заметке")
 
 
-def get_content(request: RequestData):
+def get_content(request: RequestData):  # получения body заметки
     if request.request.original_utterance == " ":
         return Response("Заметка должна содержать хотя бы один символ")
     buttons_for_note = ButtonList()
@@ -78,7 +78,7 @@ def get_content(request: RequestData):
     return Response("Сделать её приватной?", buttons=buttons_for_note)
 
 
-def get_private(request: RequestData):
+def get_private(request: RequestData):  # получения приватности
     if request.request.original_utterance == "да":
         res = create_note({"content": notes_for_write[request.session["session_id"]], "private": True},
                           tokens[request.session["session_id"]])
@@ -98,7 +98,7 @@ def get_private(request: RequestData):
     return Response("Немного не поняла вас. Сделать её приватной?", buttons=buttons_for_get_private)
 
 
-def get_id(request: RequestData):
+def get_id(request: RequestData):  # получение id
     if not request.request.original_utterance.isdigit():
         return Response("id всегда число", buttons=buttons)
     res = read_note_by_id(request.request.original_utterance)
@@ -108,7 +108,7 @@ def get_id(request: RequestData):
                     buttons=buttons)
 
 
-def iter_notes(request: RequestData):
+def iter_notes(request: RequestData):  # итерироваться по всем запискам
     notes_, current_note = notes[request.session["session_id"]]
     if request.request.original_utterance == ">>":
         if len(notes_) < 1:
